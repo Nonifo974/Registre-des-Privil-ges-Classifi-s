@@ -374,7 +374,7 @@ async function init(){
     const bonusMalus = document.getElementById('fBonusMalus').value.trim();
     if(!title || !mission){ alert('Titre et mission requis.'); return; }
     
-    if(!state.pending) state.pending = [];
+    if (!Array.isArray(state.pending)) state.pending = [];
     state.pending.push({ id: uid(), title, mission, points, meta, bonusMalus });
 
 fetch('https://ntfy.sh/great-adventure-0810', {
