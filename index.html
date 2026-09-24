@@ -69,6 +69,22 @@ body{
   font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; letter-spacing:.08em;
   border-bottom:1px solid var(--line); padding-bottom:6px; margin-bottom:12px; color:var(--ink);
 }
+
+/* VITRINE DES TROPHÉES */
+.trophy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 12px; margin-top: 16px; padding: 0 4px; }
+.trophy-item {
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  opacity: 0.25; filter: grayscale(100%); transition: all 0.3s ease; cursor: help;
+}
+.trophy-item.unlocked { opacity: 1; filter: none; transform: scale(1.05); cursor: pointer; }
+.trophy-icon { 
+  font-size: 26px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; 
+  background:var(--paper2); border: 2px solid var(--ink); border-radius: 50%; 
+  margin-bottom:6px; box-shadow: 2px 2px 0px rgba(0,0,0,0.2); 
+}
+[data-theme="terminal"] .trophy-icon { background: #000; border-color: var(--ink); box-shadow: 2px 2px 0px rgba(51, 255, 51, 0.2); }
+.trophy-label { font-size: 9px; font-family: 'Oswald', sans-serif; font-weight: 600; line-height:1.2; text-transform:uppercase; letter-spacing:0.05em; }
+
 .mission-card{ background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative; margin-bottom:12px; }
 .mission-card:last-child{ margin-bottom:0; }
 .mission-card .badge{
@@ -144,6 +160,11 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
   </div>
 
   <div class="section">
+    <h2>Vitrine d'Honneur de l'Agence</h2>
+    <div id="trophyZone" class="trophy-grid"></div>
+  </div>
+
+  <div class="section">
     <h2>En attente de validation</h2>
     <div id="pendingZone"><div class="empty">Aucun Murder en attente.</div></div>
   </div>
@@ -193,6 +214,21 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
     </div>
 
     <button id="btnPublish" style="margin-top:16px;">Diffuser le Murder</button>
+
+    <div style="margin-top:32px; padding-top:16px; border-top:1px dashed var(--line);">
+      <h3 style="margin:0 0 12px; font-family:'Oswald',sans-serif; font-size:14px; color:var(--ink);">Décerner un Trophée (Manuel)</h3>
+      <div class="row2">
+        <select id="fManualTrophy" style="flex:2;">
+          <option value="m_bivouac">Opération Bivouac</option>
+          <option value="m_nego">L'Art de la Négociation</option>
+          <option value="m_profilage">Profilage</option>
+          <option value="m_interro">Interrogatoire Musclé</option>
+          <option value="m_voix">La Voix de l'Agence</option>
+          <option value="m_sixieme">Sixième Sens</option>
+        </select>
+        <button id="btnAwardTrophy" style="flex:1;">✔ Valider</button>
+      </div>
+    </div>
   </div>
 
   <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
@@ -228,7 +264,41 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
 <script>
 const LADDER = [[200,"Massage de 15 minutes"],[400,"Pass « Exemption d'une tâche »"],[500,"Petit-déjeuner au lit"],[750,"Pique-nique en amoureux"],[1000,"Soirée film avec confiseries incluses"],[1250,"Massage complet de 30 minutes"],[1500,"Petit-déjeuner au lit"],[1750,"Massage de 15 minutes"],[2000,"Activité surprise préparée par le Maître du Jeu"],[2250,"Pass « Exemption d'une tâche »"],[2500,"1 cadeau au choix"],[2750,"Massage complet de 30 minutes"],[3000,"Sortie au cinéma"],[3250,"Massage de 15 minutes"],[3500,"Soirée cocktail / apéro maison"],[3750,"Massage complet de 30 minutes"],[4000,"Activité surprise préparée par le Maître du Jeu"],[4250,"Bouquet surprise"],[4500,"Petit-déjeuner au lit"],[4750,"Massage complet de 30 minutes"],[5000,"Un bon restaurant en amoureux"],[5250,"Massage de 15 minutes"],[5500,"1 cadeau au choix"],[5750,"Massage complet de 30 minutes"],[6000,"Activité surprise préparée par le Maître du Jeu"],[6250,"Massage de 15 minutes"],[6500,"Soirée cocktail / apéro maison"],[6750,"Massage complet de 30 minutes"],[7000,"Soirée film & plateau télé au choix"],[7250,"Massage de 15 minutes"],[7500,"Journée / activité surprise (spa, sortie fun...)"],[7750,"Massage complet de 30 minutes"],[8000,"Activité surprise préparée par le Maître du Jeu"],[8250,"Massage de 15 minutes"],[8500,"Bouquet surprise"],[8750,"Massage complet de 30 minutes"],[9000,"Sortie au cinéma"],[9250,"Massage de 15 minutes"],[9500,"Activité surprise préparée par le Maître du Jeu"],[9750,"Massage complet de 30 minutes"],[10000,"Week-end en amoureux à l'hôtel (2 nuits)"],[10250,"Massage de 15 minutes"],[10500,"Pique-nique en amoureux"],[10750,"Massage complet de 30 minutes"],[11000,"Soirée film avec confiseries incluses"],[11250,"Massage de 15 minutes"],[11500,"Soirée cocktail / apéro maison"],[11750,"Massage complet de 30 minutes"],[12000,"Activité surprise préparée par le Maître du Jeu"],[12250,"Massage de 15 minutes"],[12500,"1 cadeau au choix"],[12750,"Massage complet de 30 minutes"],[13000,"Sortie au cinéma"],[13250,"Massage de 15 minutes"],[13500,"Soirée cocktail / apéro maison"],[13750,"Massage complet de 30 minutes"],[14000,"Activité surprise préparée par le Maître du Jeu"],[14250,"Massage de 15 minutes"],[14500,"Bouquet surprise"],[14750,"Massage complet de 30 minutes"],[15000,"Repas gastronomique préparé par le chef Théo"],[15250,"Massage de 15 minutes"],[15500,"Pique-nique en amoureux"],[15750,"Massage complet de 30 minutes"],[16000,"1 cadeau au choix"],[16250,"Massage de 15 minutes"],[16500,"Activité surprise préparée par le Maître du Jeu"],[16750,"Massage complet de 30 minutes"],[17000,"Soirée film avec confiseries incluses"],[17250,"Massage de 15 minutes"],[17500,"Gros restaurant ($$$)"],[17750,"Massage complet de 30 minutes"],[18000,"Bouquet surprise"],[18250,"Massage de 15 minutes"],[18500,"1 cadeau au choix"],[18750,"Massage complet de 30 minutes"],[19000,"Soirée film avec confiseries incluses"],[19250,"Massage de 15 minutes"],[19500,"Soirée cocktail / apéro maison"],[19750,"Massage complet de 30 minutes"],[20000,"Voyage d'une semaine"]];
 
-let state = { totalPoints: 0, pending: [], active: [], history: [], claimed: [], validatedCoupons: [] };
+// LISTE COMPLÈTE DES 24 TROPHÉES
+function hasAchiev(id) { return (state.achievements || []).includes(id); }
+const TROPHIES = [
+  // PALIERS (Calcul dynamique)
+  { id: 't_1k', icon: '🥉', label: 'Bronze', desc: 'Insigne de Bronze : Atteindre 1 000 pts', req: () => state.totalPoints >= 1000 },
+  { id: 't_2k5', icon: '🥈', label: 'Argent', desc: 'Insigne d\'Argent : Atteindre 2 500 pts', req: () => state.totalPoints >= 2500 },
+  { id: 't_5k', icon: '🥇', label: 'Or', desc: 'Insigne d\'Or : Atteindre 5 000 pts', req: () => state.totalPoints >= 5000 },
+  { id: 't_10k', icon: '💎', label: 'Platine', desc: 'Insigne de Platine : Atteindre 10 000 pts', req: () => state.totalPoints >= 10000 },
+  { id: 't_15k', icon: '🔮', label: 'Titane', desc: 'Insigne de Titane : Atteindre 15 000 pts', req: () => state.totalPoints >= 15000 },
+  { id: 't_20k', icon: '👑', label: 'Légende', desc: 'Médaille de Légende de l\'Agence : 20 000 pts !', req: () => state.totalPoints >= 20000 },
+  
+  // EXPLOITS AUTO (Mémorisés)
+  { id: 'a_nuit', icon: '🦉', label: 'Oiseau Nuit', desc: 'Garde de Nuit : Valider un rapport entre minuit et 4h du matin.', req: () => hasAchiev('a_nuit') },
+  { id: 'a_marathon', icon: '🏃‍♀️', label: 'Marathon', desc: 'Marathonienne : Enchaîner 5 Murders en un temps record (48h).', req: () => hasAchiev('a_marathon') },
+  { id: 'a_distorsion', icon: '⏳', label: 'Distorsion', desc: 'Distorsion Spatio-Temporelle : Réussir une mission en attente depuis > 14 jours.', req: () => hasAchiev('a_distorsion') },
+  { id: 'a_sangfroid', icon: '🧊', label: 'Sang-Froid', desc: 'Le Prix du Sang-Froid : Valider une mission Malus sans subir la pénalité.', req: () => hasAchiev('a_sangfroid') },
+  { id: 'a_admis', icon: '🎓', label: 'Grand Admis', desc: 'Grand Admis : Valider 5 missions d\'affilée sans aucun refus.', req: () => hasAchiev('a_admis') },
+  { id: 'a_thesaurus', icon: '🏦', label: 'Épargne', desc: 'Thésauriseuse : Cumuler 1 000 pts sans dépenser un seul coupon.', req: () => state.totalPoints >= 1000 && (!state.claimed || state.claimed.length === 0) },
+  { id: 'a_folie', icon: '🛍️', label: 'Folie', desc: 'Folie des Grandeurs : Utiliser 2 coupons de privilèges le même jour.', req: () => hasAchiev('a_folie') },
+  { id: 'a_boucle', icon: '🔄', label: 'Boucle', desc: 'Boucle Temporelle : Subir un malus sur 2 Murders consécutifs.', req: () => hasAchiev('a_boucle') },
+  { id: 'a_precision', icon: '🎯', label: 'Précision', desc: 'Précision Chirurgicale : Tomber pile sur un palier lors d\'une validation.', req: () => hasAchiev('a_precision') },
+  { id: 'a_nuitblanche', icon: '🦇', label: 'Nuit Blanche', desc: 'Nuit Blanche : Décrocher "Garde de Nuit" deux fois en moins de 7 jours.', req: () => hasAchiev('a_nuitblanche') },
+  { id: 'a_complice', icon: '🤝', label: 'Complice', desc: 'La Complice Fidèle : Atteindre le 50ème Murder validé au total.', req: () => (state.history||[]).length >= 50 },
+  { id: 'a_eleve', icon: '😇', label: 'Bon Élève', desc: 'Le Bon Élève : Passer plus de 30 jours consécutifs actifs sans subir un seul malus.', req: () => hasAchiev('a_eleve') },
+
+  // EXPLOITS MANUELS (Attribués par le GM)
+  { id: 'm_bivouac', icon: '🏕️', label: 'Bivouac', desc: 'Opération Bivouac : Mission 100% en extérieur ou nature.', req: () => hasAchiev('m_bivouac') },
+  { id: 'm_nego', icon: '💬', label: 'Négociation', desc: 'L\'Art de la Négociation : Annuler un malus via un compromis.', req: () => hasAchiev('m_nego') },
+  { id: 'm_profilage', icon: '🕵️‍♀️', label: 'Profilage', desc: 'Profilage : Deviner l\'indice caché sans payer les points.', req: () => hasAchiev('m_profilage') },
+  { id: 'm_interro', icon: '🔦', label: 'Interrogatoire', desc: 'Interrogatoire Musclé : Obtenir un indice supplémentaire en cuisinant le MJ.', req: () => hasAchiev('m_interro') },
+  { id: 'm_voix', icon: '🎙️', label: 'Voix Agence', desc: 'La Voix de l\'Agence : Proposer une idée de Murder qui est diffusée.', req: () => hasAchiev('m_voix') },
+  { id: 'm_sixieme', icon: '🔮', label: '6ème Sens', desc: 'Sixième Sens : Deviner à l\'avance le thème du prochain Murder.', req: () => hasAchiev('m_sixieme') }
+];
+
+let state = { totalPoints: 0, pending: [], active: [], history: [], claimed: [], validatedCoupons: [], achievements: [], stats: {} };
 let pendingConfirmKey = null;
 let canEdit = false;
 let docRef = null;
@@ -271,6 +341,11 @@ document.getElementById('btnMute').onclick = () => { isMuted = !isMuted; localSt
 function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
 function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function extractNumber(text){ const m = (text||'').match(/[-+]?\d+/); return m ? parseInt(m[0],10) : 0; }
+function awardAchiev(id){
+  if (!state.achievements) state.achievements = [];
+  if (!state.achievements.includes(id)) { state.achievements.push(id); return true; }
+  return false;
+}
 
 function finalizeValidate(id, bonusAdjust){
   try{
@@ -278,15 +353,59 @@ function finalizeValidate(id, bonusAdjust){
     if(idx === -1) return;
     const item = state.active[idx];
     const finalPts = Math.max(0, item.points + (bonusAdjust||0));
-    state.history.push({ id: uid(), title: item.title, points: finalPts });
+    const now = Date.now();
+    let unlocked = false;
+
+    // VALIDATION DES HAUTS FAITS AUTOMATIQUES
+    if(!state.stats) state.stats = { consecValid:0, gardeDates:[], claimDates:[], consecMalus:0, lastMalusDate:0 };
+    
+    // Distorsion Spatio-Temporelle (>14 jours)
+    if (item.createdAt && now - item.createdAt > 14*24*60*60*1000) unlocked = awardAchiev('a_distorsion') || unlocked;
+    
+    // Garde de Nuit & Nuit Blanche
+    const hr = new Date().getHours();
+    if (hr >= 0 && hr < 4) {
+      unlocked = awardAchiev('a_nuit') || unlocked;
+      state.stats.gardeDates.push(now);
+      state.stats.gardeDates = state.stats.gardeDates.filter(t => now - t < 7*24*60*60*1000);
+      if(state.stats.gardeDates.length >= 2) unlocked = awardAchiev('a_nuitblanche') || unlocked;
+    }
+
+    // Le Prix du Sang-Froid (Malus passé avec succès)
+    if (item.bmType === 'Malus' && (bonusAdjust||0) >= 0) unlocked = awardAchiev('a_sangfroid') || unlocked;
+
+    // Boucle Temporelle (2 malus consécutifs) & Bon Élève
+    if ((bonusAdjust||0) < 0) {
+      state.stats.consecMalus = (state.stats.consecMalus || 0) + 1;
+      state.stats.lastMalusDate = now;
+      if (state.stats.consecMalus >= 2) unlocked = awardAchiev('a_boucle') || unlocked;
+    } else {
+      state.stats.consecMalus = 0;
+      if (state.stats.lastMalusDate > 0 && (now - state.stats.lastMalusDate > 30*24*60*60*1000)) unlocked = awardAchiev('a_eleve') || unlocked;
+    }
+
+    // Grand Admis (5 consécutifs sans refus)
+    state.stats.consecValid = (state.stats.consecValid || 0) + 1;
+    if (state.stats.consecValid >= 5) unlocked = awardAchiev('a_admis') || unlocked;
+
+    // Historisation & Ajout des points
+    state.history.push({ id: uid(), title: item.title, points: finalPts, timestamp: now });
     state.totalPoints += finalPts;
     state.active.splice(idx, 1);
     pendingConfirmKey = null;
-    
-    playSound('stamp');
+
+    // Précision Chirurgicale (Tombe pile sur un palier)
+    if (LADDER.some(t => t[0] === state.totalPoints)) unlocked = awardAchiev('a_precision') || unlocked;
+
+    // Marathonienne (5 en 48h)
+    const recentMurders = state.history.filter(h => h.timestamp && (now - h.timestamp < 48*60*60*1000)).length;
+    if (recentMurders >= 5) unlocked = awardAchiev('a_marathon') || unlocked;
+
+    // Paliers Classiques Son
     const newTier = LADDER.slice().reverse().find(t => t[0] <= state.totalPoints);
     const oldTier = LADDER.slice().reverse().find(t => t[0] <= (state.totalPoints - finalPts));
-    if (newTier && (!oldTier || newTier[0] > oldTier[0])) { setTimeout(() => playSound('victory'), 800); }
+    playSound('stamp');
+    if (unlocked || (newTier && (!oldTier || newTier[0] > oldTier[0]))) { setTimeout(() => { playSound('victory'); if(window.confetti) confetti(); }, 800); }
     
     render(); save();
   }catch(e){ console.error('finalizeValidate error', e); }
@@ -304,6 +423,15 @@ function render(){
   document.getElementById('barNow').textContent = state.totalPoints+' pts';
   document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Paliers atteints !';
 
+  // RENDER VITRINE
+  document.getElementById('trophyZone').innerHTML = TROPHIES.map(t => {
+    const isUnlocked = t.req();
+    return `<div class="trophy-item ${isUnlocked ? 'unlocked' : ''}" title="${t.desc}">
+      <div class="trophy-icon">${t.icon}</div>
+      <div class="trophy-label">${t.label}</div>
+    </div>`;
+  }).join('');
+
   const pz = document.getElementById('pendingZone');
   if(state.pending && state.pending.length){
     pz.innerHTML = state.pending.map(m => {
@@ -319,15 +447,12 @@ function render(){
         <div class="btn-row"><button data-action="accept-pending" data-id="${m.id}">✔ Accepter</button><button class="secondary" data-action="reject-pending" data-id="${m.id}">✕ Refuser</button></div>
       </div>`;
     }).join('');
-  } else {
-    pz.innerHTML = '<div class="empty">Aucun Murder en attente.</div>';
-  }
+  } else { pz.innerHTML = '<div class="empty">Aucun Murder en attente.</div>'; }
 
   const az = document.getElementById('activeZone');
   if(state.active && state.active.length){
     az.innerHTML = state.active.map(m => {
       let controls = '', clueHtml = '';
-
       let metaHtml = ''; if(m.meta) metaHtml = `<div class="chip-col"><span class="chip-label">Règlement</span><span class="chip">${esc(m.meta)}</span></div>`;
       let bmHtml = ''; if(m.bonusMalus) bmHtml = `<div class="chip-col"><span class="chip-label">${m.bmType === 'Malus' ? 'Malus' : 'Bonus'}</span><span class="chip">${esc(m.bonusMalus)}</span></div>`;
 
@@ -396,11 +521,8 @@ function render(){
 
 async function save(){ 
   if(!docRef) return; 
-  
-  // NETTOYAGE AUTO: Si le score a baissé, on supprime de la mémoire les coupons supérieurs au nouveau score
   if(state.claimed) state.claimed = state.claimed.filter(p => p <= state.totalPoints);
   if(state.validatedCoupons) state.validatedCoupons = state.validatedCoupons.filter(p => p <= state.totalPoints);
-  
   try{ await window.__fbSetDoc(docRef, state); }catch(e){ alert("Erreur d'enregistrement."); } 
 }
 
@@ -412,24 +534,23 @@ async function init(){
     window.__fbOnSnapshot(docRef, (snap) => {
       if(snap && snap.exists()){
         const d = snap.data(); const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v)); const toArr = (v) => Array.isArray(v) ? clone(v) : (v ? [clone(v)] : []);
-        
         const currentPoints = d.totalPoints || 0;
-        
         state = { 
           totalPoints: currentPoints, 
-          pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid()}), 
-          active: toArr(d.active).map(item => item.id ? item : {...item, id: uid()}), 
+          pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid(), createdAt: Date.now()}), 
+          active: toArr(d.active), 
           history: clone(d.history)||[],
-          
-          // NETTOYAGE AUTO (Rétroactif) dès le chargement de Firebase
           claimed: Array.isArray(d.claimed) ? d.claimed.filter(p => p <= currentPoints) : [],
-          validatedCoupons: Array.isArray(d.validatedCoupons) ? d.validatedCoupons.filter(p => p <= currentPoints) : []
+          validatedCoupons: Array.isArray(d.validatedCoupons) ? d.validatedCoupons.filter(p => p <= currentPoints) : [],
+          achievements: Array.isArray(d.achievements) ? d.achievements : [],
+          stats: d.stats || { consecValid:0, gardeDates:[], claimDates:[], consecMalus:0, lastMalusDate:0 }
         };
       }
       render();
     });
   }catch(e){ render(); }
 
+  // DEPLOYER MURDER
   document.getElementById('btnPublish').onclick = () => {
     const title = document.getElementById('fTitle').value.trim();
     const mission = document.getElementById('fMission').value.trim();
@@ -443,7 +564,7 @@ async function init(){
     if(!title || !mission){ alert('Titre et mission requis.'); return; }
     if (!Array.isArray(state.pending)) state.pending = [];
     
-    state.pending.push({ id: uid(), title, mission, clue, cluePenalty, clueRevealed: false, points, meta, bmType, bonusMalus });
+    state.pending.push({ id: uid(), createdAt: Date.now(), title, mission, clue, cluePenalty, clueRevealed: false, points, meta, bmType, bonusMalus });
     playSound('typewriter'); render(); save();
 
     document.getElementById('fTitle').value=''; document.getElementById('fMission').value='';
@@ -460,6 +581,12 @@ async function init(){
     }).catch(e=>e);
   };
 
+  // DECERNER TROPHEE MANUEL
+  document.getElementById('btnAwardTrophy').onclick = () => {
+    const val = document.getElementById('fManualTrophy').value;
+    if(awardAchiev(val)){ playSound('victory'); if(window.confetti) confetti(); render(); save(); }
+  };
+
   document.getElementById('app').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if(!btn) return;
@@ -470,7 +597,11 @@ async function init(){
         if(idx !== -1){ state.active.push(state.pending.splice(idx, 1)[0]); render(); save(); }
       } else if(action === 'reject-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
-        if(idx !== -1){ state.pending.splice(idx, 1); render(); save(); }
+        if(idx !== -1){ 
+          state.pending.splice(idx, 1);
+          if(state.stats) state.stats.consecValid = 0; // Remise à zéro Grand Admis
+          render(); save(); 
+        }
       } else if(action === 'reveal-clue'){
         const item = state.active.find(m => m.id === id);
         const penalty = parseInt(btn.dataset.penalty, 10) || 5;
@@ -494,10 +625,18 @@ async function init(){
         if(!state.claimed.includes(pts)){
           state.claimed.push(pts); playSound('victory');
           if(window.confetti) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+          
+          // FOLIE DES GRANDEURS
+          if(!state.stats) state.stats = { claimDates:[] };
+          if(!state.stats.claimDates) state.stats.claimDates = [];
+          state.stats.claimDates.push(Date.now());
+          state.stats.claimDates = state.stats.claimDates.filter(t => Date.now() - t < 24*60*60*1000);
+          if(state.stats.claimDates.length >= 2) awardAchiev('a_folie');
+
           render(); save();
           fetch('https://ntfy.sh/', {
             method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-0810-mj', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
+              topic: 'great-adventure-081', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
               priority: 4, tags: ['tada', 'ticket'], click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
             })
           }).catch(e=>e);
