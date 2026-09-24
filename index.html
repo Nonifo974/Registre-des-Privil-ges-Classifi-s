@@ -255,9 +255,6 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
             <option value="a_precision">Précision Chirurgicale</option>
             <option value="a_nuitblanche">Nuit Blanche</option>
             <option value="a_complice">La Complice Fidèle</option>
-	    <option value="a_grandeamitie">La Grande Amitié</option>
-	    <option value="a_fidele">Fidèle</option>
-	    <option value="a_amourfou">L'amour Fou</option>
             <option value="a_eleve">Le Bon Élève</option>
           </optgroup>
         </select>
@@ -353,9 +350,6 @@ const TROPHIES = [
   { id: 'a_precision', icon: '🎯', label: 'Précision', desc: 'Précision Chirurgicale : Tomber pile sur un palier lors d\'une validation.', req: () => hasAchiev('a_precision') },
   { id: 'a_nuitblanche', icon: '🦇', label: 'Nuit Blanche', desc: 'Nuit Blanche : Décrocher Garde de Nuit deux fois en moins de 7 jours.', req: () => hasAchiev('a_nuitblanche') },
   { id: 'a_complice', icon: '🤝', label: 'Complice', desc: 'La Complice Fidèle : Atteindre le 50ème Murder validé au total.', req: () => hasAchiev('a_complice') },
-  { id: 'a_grandeamitie', icon: '🫂', label: 'Grande Amitié', desc: 'Grande Amitié : Atteindre le 100ème Murder validé au total.', req: () => hasAchiev('a_grandeamitie') },
-  { id: 'a_fidele', icon: '👩🏻‍❤️‍💋‍👨🏻', label: 'Fidèle', desc: 'Fidèle : Atteindre le 500ème Murder validé au total.', req: () => hasAchiev('a_fidele') },
-  { id: 'a_amourfou', icon: '🫀', label: 'L'amour Fou', desc: 'L'amour Fou : Atteindre le 1000ème Murder validé au total.', req: () => hasAchiev('a_amourfou') },
   { id: 'a_eleve', icon: '😇', label: 'Bon Élève', desc: 'Le Bon Élève : Passer plus de 30 jours consécutifs actifs sans subir un seul malus.', req: () => hasAchiev('a_eleve') },
 
   // EXPLOITS MANUELS (Attribués par le GM)
@@ -490,9 +484,6 @@ function finalizeValidate(id, bonusAdjust){
     // Épargne & Complice vérifiés au moment de la validation
     if (state.totalPoints >= 1000 && (!state.claimed || state.claimed.length === 0)) unlocked = awardAchiev('a_thesaurus') || unlocked;
     if ((state.history||[]).length >= 50) unlocked = awardAchiev('a_complice') || unlocked;
-    if ((state.history||[]).length >= 100) unlocked = awardAchiev('a_grandeamitie') || unlocked;
-    if ((state.history||[]).length >= 500) unlocked = awardAchiev('a_fidele') || unlocked;
-    if ((state.history||[]).length >= 1000) unlocked = awardAchiev('a_amourfou') || unlocked;
 
     const newTier = LADDER.slice().reverse().find(t => t[0] <= state.totalPoints);
     const oldTier = LADDER.slice().reverse().find(t => t[0] <= (state.totalPoints - finalPts));
