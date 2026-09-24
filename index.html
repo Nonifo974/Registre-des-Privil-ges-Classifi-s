@@ -689,14 +689,6 @@ async function init(){
       if(action === 'accept-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){ state.active.push(state.pending.splice(idx, 1)[0]); render(); save(); }
-	fetch('https://ntfy.sh/', {
-            method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-0810-mj', 
-              title: '🕵️‍♀️ Mission acceptée', 
-              message: `L'Enquêteuse a accepté le Murder : "${acceptedItem.title}"`, 
-              priority: 2, 
-              tags: ['eyes', 'memo']
-            })
       } else if(action === 'reject-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){ 
