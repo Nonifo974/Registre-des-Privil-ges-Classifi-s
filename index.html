@@ -55,8 +55,9 @@ body{
   border-bottom:1px solid var(--line); padding-bottom:6px; margin-bottom:12px; color:var(--ink);
 }
 .mission-card{
-  background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative;
+  background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative; margin-bottom:12px;
 }
+.mission-card:last-child{ margin-bottom:0; }
 .mission-card .badge{
   position:absolute; top:-11px; right:14px; background:var(--red); color:var(--paper);
   font-family:'Oswald',sans-serif; font-size:10px; font-weight:600; letter-spacing:.08em;
@@ -132,7 +133,7 @@ button.danger{ background:var(--red); border-color:var(--red);}
   </div>
 
   <div class="section">
-    <h2>Mission en cours</h2>
+    <h2>Mission(s) en cours</h2>
     <div id="activeZone"><div class="empty">Aucune mission active pour le moment.</div></div>
   </div>
 
@@ -165,7 +166,7 @@ button.danger{ background:var(--red); border-color:var(--red);}
 
   <div class="foot" id="statusLine">Chargement...</div>
   <div class="foot" id="diagLine" style="color:#8a3b2e;"></div>
-  <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
+  <div class="foot">Ce dossier reste strictly confidentiel entre les deux parties signataires.</div>
 </div>
 
 <script>
@@ -198,20 +199,22 @@ button.danger{ background:var(--red); border-color:var(--red);}
 <script>
 const LADDER = [[200,"Massage de 15 minutes"],[400,"Pass « Exemption d'une tâche »"],[500,"Petit-déjeuner au lit"],[750,"Pique-nique en amoureux"],[1000,"Soirée film avec confiseries incluses"],[1250,"Massage complet de 30 minutes"],[1500,"Petit-déjeuner au lit"],[1750,"Massage de 15 minutes"],[2000,"Activité surprise préparée par le Maître du Jeu"],[2250,"Pass « Exemption d'une tâche »"],[2500,"1 cadeau au choix"],[2750,"Massage complet de 30 minutes"],[3000,"Sortie au cinéma"],[3250,"Massage de 15 minutes"],[3500,"Soirée cocktail / apéro maison"],[3750,"Massage complet de 30 minutes"],[4000,"Activité surprise préparée par le Maître du Jeu"],[4250,"Bouquet surprise"],[4500,"Petit-déjeuner au lit"],[4750,"Massage complet de 30 minutes"],[5000,"Un bon restaurant en amoureux"],[5250,"Massage de 15 minutes"],[5500,"1 cadeau au choix"],[5750,"Massage complet de 30 minutes"],[6000,"Activité surprise préparée par le Maître du Jeu"],[6250,"Massage de 15 minutes"],[6500,"Soirée cocktail / apéro maison"],[6750,"Massage complet de 30 minutes"],[7000,"Soirée film & plateau télé au choix"],[7250,"Massage de 15 minutes"],[7500,"Journée / activité surprise (spa, sortie fun...)"],[7750,"Massage complet de 30 minutes"],[8000,"Activité surprise préparée par le Maître du Jeu"],[8250,"Massage de 15 minutes"],[8500,"Bouquet surprise"],[8750,"Massage complet de 30 minutes"],[9000,"Sortie au cinéma"],[9250,"Massage de 15 minutes"],[9500,"Activité surprise préparée par le Maître du Jeu"],[9750,"Massage complet de 30 minutes"],[10000,"Week-end en amoureux à l'hôtel (2 nuits)"],[10250,"Massage de 15 minutes"],[10500,"Pique-nique en amoureux"],[10750,"Massage complet de 30 minutes"],[11000,"Soirée film avec confiseries incluses"],[11250,"Massage de 15 minutes"],[11500,"Soirée cocktail / apéro maison"],[11750,"Massage complet de 30 minutes"],[12000,"Activité surprise préparée par le Maître du Jeu"],[12250,"Massage de 15 minutes"],[12500,"1 cadeau au choix"],[12750,"Massage complet de 30 minutes"],[13000,"Sortie au cinéma"],[13250,"Massage de 15 minutes"],[13500,"Soirée cocktail / apéro maison"],[13750,"Massage complet de 30 minutes"],[14000,"Activité surprise préparée par le Maître du Jeu"],[14250,"Massage de 15 minutes"],[14500,"Bouquet surprise"],[14750,"Massage complet de 30 minutes"],[15000,"Repas gastronomique préparé par le chef Théo"],[15250,"Massage de 15 minutes"],[15500,"Pique-nique en amoureux"],[15750,"Massage complet de 30 minutes"],[16000,"1 cadeau au choix"],[16250,"Massage de 15 minutes"],[16500,"Activité surprise préparée par le Maître du Jeu"],[16750,"Massage complet de 30 minutes"],[17000,"Soirée film avec confiseries incluses"],[17250,"Massage de 15 minutes"],[17500,"Gros restaurant ($$$)"],[17750,"Massage complet de 30 minutes"],[18000,"Bouquet surprise"],[18250,"Massage de 15 minutes"],[18500,"1 cadeau au choix"],[18750,"Massage complet de 30 minutes"],[19000,"Soirée film avec confiseries incluses"],[19250,"Massage de 15 minutes"],[19500,"Soirée cocktail / apéro maison"],[19750,"Massage complet de 30 minutes"],[20000,"Voyage d'une semaine"]];
 
-let state = { totalPoints: 0, pending: null, active: null, history: [] };
+let state = { totalPoints: 0, pending: [], active: [], history: [] };
 let pendingConfirmKey = null;
-let showBonusForm = false;
 function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
 function extractNumber(text){ const m = (text||'').match(/[-+]?\d+/); return m ? parseInt(m[0],10) : 0; }
-function finalizeValidate(bonusAdjust){
+
+function finalizeValidate(id, bonusAdjust){
   try{
-    if(!state.active) return;
+    const idx = state.active.findIndex(m => m.id === id);
+    if(idx === -1) return;
+    const item = state.active[idx];
     const manual = parseInt((document.getElementById('fAdjust')||{}).value, 10) || 0;
-    const finalPts = Math.max(0, state.active.points + manual + (bonusAdjust||0));
-    state.history.push({ id: uid(), title: state.active.title, points: finalPts });
+    const finalPts = Math.max(0, item.points + manual + (bonusAdjust||0));
+    state.history.push({ id: uid(), title: item.title, points: finalPts });
     state.totalPoints += finalPts;
-    state.active = null;
-    showBonusForm = false;
+    state.active.splice(idx, 1);
+    pendingConfirmKey = null;
     const fa = document.getElementById('fAdjust'); if(fa) fa.value = '';
     render();
     save();
@@ -219,12 +222,11 @@ function finalizeValidate(bonusAdjust){
     console.error('finalizeValidate error', e);
   }
 }
+
 let canEdit = false;
-let dbNs = null;
 let docRef = null;
 
 function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-
 
 function render(){
   document.getElementById('score').textContent = state.totalPoints;
@@ -239,38 +241,49 @@ function render(){
   document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Tous les paliers atteints !';
 
   const pz = document.getElementById('pendingZone');
-  if(state.pending){
-    const m = state.pending;
-    pz.innerHTML = `<div class="mission-card pending"><div class="badge pending-badge">En attente de validation</div>
-      <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
-      <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
-      <div class="btn-row"><button data-action="accept-pending">✔ Accepter</button><button class="secondary" data-action="reject-pending">✕ Refuser</button></div></div>`;
+  if(state.pending && state.pending.length){
+    pz.innerHTML = state.pending.map(m => `
+      <div class="mission-card pending">
+        <div class="badge pending-badge">En attente de validation</div>
+        <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
+        <div class="mission-meta">
+          <span class="chip pts">${m.points} pts</span>
+          ${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}
+          ${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}
+        </div>
+        <div class="btn-row">
+          <button data-action="accept-pending" data-id="${m.id}">✔ Accepter</button>
+          <button class="secondary" data-action="reject-pending" data-id="${m.id}">✕ Refuser</button>
+        </div>
+      </div>
+    `).join('');
   } else {
     pz.innerHTML = '<div class="empty">Aucun Murder en attente.</div>';
   }
 
   const az = document.getElementById('activeZone');
-  if(state.active){
-    const m = state.active;
-    let controls = '';
-    if(canEdit){
-      if(pendingConfirmKey === 'delete-active'){
-        controls = `<div class="btn-row"><span style="font-size:12px;align-self:center;">Confirmer la suppression ?</span><button class="danger" data-action="confirm-delete-active">Oui, supprimer</button><button class="secondary" data-action="cancel-confirm">Non</button></div>`;
-      } else if(showBonusForm && m.bonusMalus){
-        const suggested = extractNumber(m.bonusMalus);
-        controls = `<div style="margin-top:12px;">
-          <div style="font-size:13px;margin-bottom:6px;">Bonus/Malus indiqué : « ${esc(m.bonusMalus)} »<br>Combien de points ajouter (+) ou retirer (−) ?</div>
-          <input id="bonusPts" type="number" value="${suggested}" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--ink);font-family:'Special Elite',monospace;font-size:13px;">
-          <div class="btn-row"><button data-action="confirm-validate-bonus">✔ Appliquer et valider</button><button class="secondary" data-action="confirm-validate-ignore">Ignorer et valider</button><button class="secondary" data-action="cancel-confirm">Annuler</button></div>
-        </div>`;
-      } else {
-        controls = `<div class="btn-row"><button data-action="validate-active">✔ Valider (+points)</button><button class="secondary" data-action="delete-active">🗑 Supprimer cette mission</button></div>`;
+  if(state.active && state.active.length){
+    az.innerHTML = state.active.map(m => {
+      let controls = '';
+      if(canEdit){
+        if(pendingConfirmKey === 'delete-active:' + m.id){
+          controls = `<div class="btn-row"><span style="font-size:12px;align-self:center;">Confirmer la suppression ?</span><button class="danger" data-action="confirm-delete-active" data-id="${m.id}">Oui, supprimer</button><button class="secondary" data-action="cancel-confirm">Non</button></div>`;
+        } else if(pendingConfirmKey === 'bonus-active:' + m.id && m.bonusMalus){
+          const suggested = extractNumber(m.bonusMalus);
+          controls = `<div style="margin-top:12px;">
+            <div style="font-size:13px;margin-bottom:6px;">Bonus/Malus indiqué : « ${esc(m.bonusMalus)} »<br>Combien de points ajouter (+) ou retirer (−) ?</div>
+            <input id="bonusPts_${m.id}" type="number" value="${suggested}" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--ink);font-family:'Special Elite',monospace;font-size:13px;">
+            <div class="btn-row"><button data-action="confirm-validate-bonus" data-id="${m.id}">✔ Appliquer et valider</button><button class="secondary" data-action="confirm-validate-ignore" data-id="${m.id}">Ignorer et valider</button><button class="secondary" data-action="cancel-confirm">Annuler</button></div>
+          </div>`;
+        } else {
+          controls = `<div class="btn-row"><button data-action="validate-active" data-id="${m.id}">✔ Valider (+points)</button><button class="secondary" data-action="delete-active" data-id="${m.id}">🗑 Supprimer cette mission</button></div>`;
+        }
       }
-    }
-    az.innerHTML = `<div class="mission-card"><div class="badge">Mission en cours</div>
-      <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
-      <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
-      ${controls}</div>`;
+      return `<div class="mission-card"><div class="badge">Mission en cours</div>
+        <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
+        <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
+        ${controls}</div>`;
+    }).join('');
   } else {
     az.innerHTML = '<div class="empty">Aucune mission active pour le moment.</div>';
   }
@@ -293,7 +306,7 @@ function render(){
     return `<div class="ladder-item ${done?'done':'locked'}"><span class="mark">${done?'✔':'•'}</span><span style="flex:1">${esc(label)}</span><span class="pts">${pts} pts</span></div>`;
   }).join('');
 
-  document.getElementById('validateZone').style.display = state.active ? 'block' : 'none';
+  document.getElementById('validateZone').style.display = (state.active && state.active.length) ? 'block' : 'none';
   document.getElementById('gmPanel').style.display = canEdit ? 'block' : 'none';
 }
 
@@ -329,7 +342,13 @@ async function init(){
       if(snap && snap.exists()){
         const d = snap.data();
         const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v));
-        state = { totalPoints: d.totalPoints||0, pending: clone(d.pending)||null, active: clone(d.active)||null, history: clone(d.history)||[] };
+        const toArr = (v) => Array.isArray(v) ? clone(v) : (v ? [clone(v)] : []);
+        state = { 
+          totalPoints: d.totalPoints||0, 
+          pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid()}), 
+          active: toArr(d.active).map(item => item.id ? item : {...item, id: uid()}), 
+          history: clone(d.history)||[] 
+        };
         if(diag) diag.textContent = 'Connecté — dernière mise à jour reçue à ' + now + ' (total: ' + state.totalPoints + ' pts, ' + state.history.length + ' murders)';
       } else {
         if(diag) diag.textContent = 'Connecté — aucun document trouvé dans la base (état vide) à ' + now;
@@ -354,7 +373,10 @@ async function init(){
     const meta = document.getElementById('fMeta').value.trim();
     const bonusMalus = document.getElementById('fBonusMalus').value.trim();
     if(!title || !mission){ alert('Titre et mission requis.'); return; }
-    state.pending = { title, mission, points, meta, bonusMalus };
+    
+    if(!state.pending) state.pending = [];
+    state.pending.push({ id: uid(), title, mission, points, meta, bonusMalus });
+    
     render();
     save();
     document.getElementById('fTitle').value='';
@@ -367,56 +389,66 @@ async function init(){
     const btn = e.target.closest('[data-action]');
     if(!btn){ return; }
     const action = btn.dataset.action;
+    const id = btn.dataset.id;
     try{
-    if(action === 'accept-pending'){
-      if(!state.pending) return;
-      state.active = state.pending;
-      state.pending = null;
-      render();
-      save();
-    } else if(action === 'reject-pending'){
-      state.pending = null;
-      render();
-      save();
-    } else if(action === 'validate-active'){
-      if(!state.active) return;
-      if(state.active.bonusMalus){
-        showBonusForm = true;
+      if(action === 'accept-pending'){
+        const idx = state.pending.findIndex(m => m.id === id);
+        if(idx !== -1){
+          const item = state.pending.splice(idx, 1)[0];
+          if(!state.active) state.active = [];
+          state.active.push(item);
+          render();
+          save();
+        }
+      } else if(action === 'reject-pending'){
+        const idx = state.pending.findIndex(m => m.id === id);
+        if(idx !== -1){
+          state.pending.splice(idx, 1);
+          render();
+          save();
+        }
+      } else if(action === 'validate-active'){
+        const item = state.active.find(m => m.id === id);
+        if(!item) return;
+        if(item.bonusMalus){
+          pendingConfirmKey = 'bonus-active:' + id;
+          render();
+        } else {
+          finalizeValidate(id, 0);
+        }
+      } else if(action === 'confirm-validate-bonus'){
+        const input = document.getElementById('bonusPts_' + id);
+        const bonusPts = parseInt((input||{}).value, 10) || 0;
+        finalizeValidate(id, bonusPts);
+      } else if(action === 'confirm-validate-ignore'){
+        finalizeValidate(id, 0);
+      } else if(action === 'delete-active'){
+        pendingConfirmKey = 'delete-active:' + id;
         render();
-      } else {
-        finalizeValidate(0);
+      } else if(action === 'confirm-delete-active'){
+        const idx = state.active.findIndex(m => m.id === id);
+        if(idx !== -1){
+          state.active.splice(idx, 1);
+          pendingConfirmKey = null;
+          render();
+          save();
+        }
+      } else if(action === 'delete-history'){
+        pendingConfirmKey = 'delete-history:' + id;
+        render();
+      } else if(action === 'confirm-delete-history'){
+        const idx = state.history.findIndex(h => h.id === id);
+        if(idx !== -1){
+          state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
+          state.history.splice(idx,1);
+        }
+        pendingConfirmKey = null;
+        render();
+        save();
+      } else if(action === 'cancel-confirm'){
+        pendingConfirmKey = null;
+        render();
       }
-    } else if(action === 'confirm-validate-bonus'){
-      const bonusPts = parseInt((document.getElementById('bonusPts')||{}).value, 10) || 0;
-      finalizeValidate(bonusPts);
-    } else if(action === 'confirm-validate-ignore'){
-      finalizeValidate(0);
-    } else if(action === 'delete-active'){
-      pendingConfirmKey = 'delete-active';
-      render();
-    } else if(action === 'confirm-delete-active'){
-      state.active = null;
-      pendingConfirmKey = null;
-      render();
-      save();
-    } else if(action === 'delete-history'){
-      pendingConfirmKey = 'delete-history:'+btn.dataset.id;
-      render();
-    } else if(action === 'confirm-delete-history'){
-      const id = btn.dataset.id;
-      const idx = state.history.findIndex(h => h.id === id);
-      if(idx !== -1){
-        state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
-        state.history.splice(idx,1);
-      }
-      pendingConfirmKey = null;
-      render();
-      save();
-    } else if(action === 'cancel-confirm'){
-      pendingConfirmKey = null;
-      showBonusForm = false;
-      render();
-    }
     }catch(err){
       console.error('click handler error ('+action+')', err);
     }
