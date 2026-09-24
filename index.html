@@ -1,18 +1,3 @@
-Pardon pour ça ! Dans mon précédent message, j'ai voulu te faire un exemple conceptuel résumé et j'ai effectivement coupé une partie du code réel (dont les notifications `ntfy`).
-
-J'ai tout restauré et appliqué tes nouvelles consignes au millimètre :
-
-1. **Les notifications Ntfy** sont bien de retour pour l'ajout de missions et l'utilisation de coupons.
-2. **Le bouton de la Vitrine d'Honneur** est désormais unique. Il se trouve juste en dessous du Registre des récompenses. Quand tu cliques dessus, la page bascule sur la Vitrine, et le bouton se transforme en "Retour au Dossier" (il reste au même endroit pour un clic rapide).
-3. **Le module de Trophées (Panneau MJ) a été amélioré :** Tu as maintenant une liste déroulante avec absolument tous les trophées (manuels et automatiques). Tu as un bouton **"✔ Décerner"** et un bouton **"🗑 Retirer"**.
-* Si tu retires un badge manuel, il disparaît (tu pourras le redonner plus tard).
-* Si tu retires un badge automatique, il disparaît, mais le système se remet à l'affût. Dès qu'elle remplira à nouveau les conditions (par exemple valider une mission après minuit pour *Garde de Nuit*), l'application lui redonnera automatiquement.
-
-
-
-Voici le code final complet et fonctionnel à copier dans ton `index.html` :
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -782,5 +767,3 @@ init();
 </script>
 </body>
 </html>
-
-```
