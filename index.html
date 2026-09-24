@@ -307,7 +307,6 @@ document.getElementById('btnToggleView').onclick = () => {
     document.getElementById('viewMain').style.display = 'none';
     document.getElementById('viewVitrine').style.display = 'block';
     
-    // Modification de l'aspect du bouton pour le retour
     document.getElementById('btnToggleView').innerHTML = '🔙 Retour au Dossier';
     document.getElementById('btnToggleView').style.background = 'transparent';
     document.getElementById('btnToggleView').style.color = isDark ? '#ffff33' : 'var(--ink)';
@@ -318,7 +317,6 @@ document.getElementById('btnToggleView').onclick = () => {
     document.getElementById('viewMain').style.display = 'block';
     document.getElementById('viewVitrine').style.display = 'none';
     
-    // Restauration de l'aspect initial du bouton
     document.getElementById('btnToggleView').innerHTML = '🏆 Consulter la Vitrine d\'Honneur';
     document.getElementById('btnToggleView').style.background = isDark ? '#ffff33' : 'var(--gold)';
     document.getElementById('btnToggleView').style.color = isDark ? '#000' : '#1c1706';
@@ -330,7 +328,6 @@ document.getElementById('btnToggleView').onclick = () => {
 // LISTE COMPLÈTE DES 24 TROPHÉES
 function hasAchiev(id) { return (state.achievements || []).includes(id); }
 const TROPHIES = [
-  // PALIERS (Calcul dynamique lié au score pur)
   { id: 't_1k', icon: '🥉', label: 'Bronze', desc: 'Insigne de Bronze : Atteindre 1 000 pts', req: () => state.totalPoints >= 1000 },
   { id: 't_2k5', icon: '🥈', label: 'Argent', desc: 'Insigne d\'Argent : Atteindre 2 500 pts', req: () => state.totalPoints >= 2500 },
   { id: 't_5k', icon: '🥇', label: 'Or', desc: 'Insigne d\'Or : Atteindre 5 000 pts', req: () => state.totalPoints >= 5000 },
@@ -338,7 +335,6 @@ const TROPHIES = [
   { id: 't_15k', icon: '🔮', label: 'Titane', desc: 'Insigne de Titane : Atteindre 15 000 pts', req: () => state.totalPoints >= 15000 },
   { id: 't_20k', icon: '👑', label: 'Légende', desc: 'Médaille de Légende de l\'Agence : 20 000 pts !', req: () => state.totalPoints >= 20000 },
   
-  // EXPLOITS AUTO (Mémorisés en base)
   { id: 'a_nuit', icon: '🦉', label: 'Oiseau Nuit', desc: 'Garde de Nuit : Valider un rapport entre minuit et 4h du matin.', req: () => hasAchiev('a_nuit') },
   { id: 'a_marathon', icon: '🏃‍♀️', label: 'Marathon', desc: 'Marathonienne : Enchaîner 5 Murders en un temps record (48h).', req: () => hasAchiev('a_marathon') },
   { id: 'a_distorsion', icon: '⏳', label: 'Distorsion', desc: 'Distorsion Spatio-Temporelle : Réussir une mission en attente depuis > 14 jours.', req: () => hasAchiev('a_distorsion') },
@@ -352,7 +348,6 @@ const TROPHIES = [
   { id: 'a_complice', icon: '🤝', label: 'Complice', desc: 'La Complice Fidèle : Atteindre le 50ème Murder validé au total.', req: () => hasAchiev('a_complice') },
   { id: 'a_eleve', icon: '😇', label: 'Bon Élève', desc: 'Le Bon Élève : Passer plus de 30 jours consécutifs actifs sans subir un seul malus.', req: () => hasAchiev('a_eleve') },
 
-  // EXPLOITS MANUELS (Attribués par le GM)
   { id: 'm_bivouac', icon: '🏕️', label: 'Bivouac', desc: 'Opération Bivouac : Mission 100% en extérieur ou nature.', req: () => hasAchiev('m_bivouac') },
   { id: 'm_nego', icon: '💬', label: 'Négociation', desc: 'L\'Art de la Négociation : Annuler un malus via un compromis.', req: () => hasAchiev('m_nego') },
   { id: 'm_profilage', icon: '🕵️‍♀️', label: 'Profilage', desc: 'Profilage : Deviner l\'indice caché sans payer les points.', req: () => hasAchiev('m_profilage') },
@@ -444,7 +439,6 @@ function finalizeValidate(id, bonusAdjust){
     const now = Date.now();
     let unlocked = false;
 
-    // VALIDATION DES HAUTS FAITS AUTOMATIQUES
     if(!state.stats) state.stats = { consecValid:0, gardeDates:[], claimDates:[], consecMalus:0, lastMalusDate:0 };
     
     if (item.createdAt && now - item.createdAt > 14*24*60*60*1000) unlocked = awardAchiev('a_distorsion') || unlocked;
@@ -481,7 +475,6 @@ function finalizeValidate(id, bonusAdjust){
     const recentMurders = state.history.filter(h => h.timestamp && (now - h.timestamp < 48*60*60*1000)).length;
     if (recentMurders >= 5) unlocked = awardAchiev('a_marathon') || unlocked;
 
-    // Épargne & Complice vérifiés au moment de la validation
     if (state.totalPoints >= 1000 && (!state.claimed || state.claimed.length === 0)) unlocked = awardAchiev('a_thesaurus') || unlocked;
     if ((state.history||[]).length >= 50) unlocked = awardAchiev('a_complice') || unlocked;
 
@@ -491,6 +484,16 @@ function finalizeValidate(id, bonusAdjust){
     if (unlocked || (newTier && (!oldTier || newTier[0] > oldTier[0]))) { setTimeout(() => { playSound('victory'); if(window.confetti) confetti(); }, 800); }
     
     render(); save();
+
+    // 🔔 NOTIFICATION DISCRÈTE (Validation d'un Murder) sur le canal "great-accessibility/adventure" -> "great-adventure-0810"
+    fetch('https://ntfy.sh/great-adventure-0810', {
+      method: 'POST', body: JSON.stringify({
+        title: '✅ Murder validé !',
+        message: `La mission "${item.title}" a été validée (+${finalPts} pts).`,
+        priority: 2, tags: ['white_check_mark', 'medal']
+      })
+    }).catch(e=>e);
+
   }catch(e){ console.error('finalizeValidate error', e); }
 }
 
@@ -506,7 +509,6 @@ function render(){
   document.getElementById('barNow').textContent = state.totalPoints+' pts';
   document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Paliers atteints !';
 
-  // RENDER VITRINE
   document.getElementById('trophyZone').innerHTML = TROPHIES.map(t => {
     const isUnlocked = t.req();
     return `<div class="trophy-item ${isUnlocked ? 'unlocked' : ''}" title="${t.desc}">
@@ -633,7 +635,7 @@ async function init(){
     });
   }catch(e){ render(); }
 
-  // DEPLOYER MURDER (Avec Ntfy)
+  // 🔔 NOTIFICATION HAUTE PRIORITÉ (Publication Murder) sur "great-adventure-0810"
   document.getElementById('btnPublish').onclick = () => {
     const title = document.getElementById('fTitle').value.trim();
     const mission = document.getElementById('fMission').value.trim();
@@ -654,10 +656,9 @@ async function init(){
     document.getElementById('fClue').value=''; document.getElementById('fCluePenalty').value=''; 
     document.getElementById('fMeta').value=''; document.getElementById('fBonusMalus').value='';
 
-    // Appel Ntfy réintégré
-    fetch('https://ntfy.sh/', {
+    fetch('https://ntfy.sh/great-adventure-0810', {
       method: 'POST', body: JSON.stringify({
-        topic: 'great-adventure-0810', title: 'MURDER - Nouveau defi disponible !',
+        title: 'MURDER - Nouveau defi disponible !',
         message: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)`, priority: 4, tags: ['rotating_light', 'warning', 'envelope'],
         click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
         actions: [{ action: 'view', label: 'Ouvrir la mission', url: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/', clear: true }]
@@ -665,13 +666,11 @@ async function init(){
     }).catch(e=>e);
   };
 
-  // DECERNER TROPHEE MANUEL
   document.getElementById('btnAwardTrophy').onclick = () => {
     const val = document.getElementById('fManualTrophy').value;
     if(awardAchiev(val)){ playSound('victory'); if(window.confetti) confetti(); render(); save(); }
   };
 
-  // RETIRER TROPHEE
   document.getElementById('btnRemoveTrophy').onclick = () => {
     const val = document.getElementById('fManualTrophy').value;
     if (state.achievements && state.achievements.includes(val)) {
@@ -688,12 +687,25 @@ async function init(){
     try{
       if(action === 'accept-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
-        if(idx !== -1){ state.active.push(state.pending.splice(idx, 1)[0]); render(); save(); }
+        if(idx !== -1){ 
+          const acceptedItem = state.pending[idx];
+          state.active.push(state.pending.splice(idx, 1)[0]); 
+          render(); save(); 
+
+          // 🔔 NOTIFICATION DISCRÈTE (Acceptation de mission) sur "great-adventure-0810-mj"
+          fetch('https://ntfy.sh/great-adventure-0810-mj', {
+            method: 'POST', body: JSON.stringify({
+              title: '🕵️‍♀️ Mission acceptée',
+              message: `L'Enquêteuse a accepté le Murder : "${acceptedItem.title}"`,
+              priority: 2, tags: ['eyes', 'memo']
+            })
+          }).catch(e=>e);
+        }
       } else if(action === 'reject-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){ 
           state.pending.splice(idx, 1);
-          if(state.stats) state.stats.consecValid = 0; // Remise à zéro Grand Admis
+          if(state.stats) state.stats.consecValid = 0;
           render(); save(); 
         }
       } else if(action === 'reveal-clue'){
@@ -720,7 +732,6 @@ async function init(){
           state.claimed.push(pts); playSound('victory');
           if(window.confetti) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
           
-          // FOLIE DES GRANDEURS
           if(!state.stats) state.stats = { claimDates:[] };
           if(!state.stats.claimDates) state.stats.claimDates = [];
           state.stats.claimDates.push(Date.now());
@@ -729,10 +740,11 @@ async function init(){
 
           render(); save();
           
-          // Appel Ntfy réintégré
-          fetch('https://ntfy.sh/', {
+          // 🔔 NOTIFICATION HAUTE PRIORITÉ (Demande de privilège) sur "great-adventure-0810-mj"
+          fetch('https://ntfy.sh/great-adventure-0810-mj', {
             method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-0810-mj', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
+              title: '🎟 Privilège réclamé !',
+              message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
               priority: 4, tags: ['tada', 'ticket'], click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
             })
           }).catch(e=>e);
