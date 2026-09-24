@@ -390,9 +390,11 @@ fetch('https://ntfy.sh/great-adventure-0810', {
       headers: {
         'Title': 'MURDER - Nouveau defi disponible !',
         'Priority': 'high',
-        'Tags': 'rotating_light,warning,envelope'
+        'Tags': 'rotating_light,warning,envelope',
+        'Click': 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
+        'Actions': 'view, Ouvrir la mission, https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/'
       },
-      body: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)`
+      body: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)\nClique pour voir le dossier !`
     }).catch(err => console.error('Erreur notification ntfy:', err));
   };
 
