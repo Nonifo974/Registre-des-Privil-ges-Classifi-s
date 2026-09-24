@@ -376,6 +376,16 @@ async function init(){
     
     if(!state.pending) state.pending = [];
     state.pending.push({ id: uid(), title, mission, points, meta, bonusMalus });
+
+fetch('https://ntfy.sh/great_adventure_secret_2808', {
+      method: 'POST',
+      headers: {
+        'Title': '🚨 MURDER - Nouveau défi disponible !',
+        'Priority': 'high',
+        'Tags': 'warning,envelope'
+      },
+      body: `Un nouveau Murder est en attente : "${title}" (${points} pts)`
+    }).catch(err => console.error('Erreur notification ntfy:', err));
     
     render();
     save();
