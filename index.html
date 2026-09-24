@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dossier — The Great Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15140f; --paper:#e9e0c8; --paper2:#ddd2b3; --ink:#221e16;
+  --red:#9c2b26; --gold:#b8924f; --green:#41564a; --line:#c9bd98;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --shell:#0b0a08; } }
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --shell:#0b0a08; } }
+:root{ --shell:#0b0a08; }
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--shell); color:var(--ink);
+  font-family:'Special Elite', monospace; min-height:100%;
+  display:flex; justify-content:center; padding:32px 16px 60px;
+}
+.sheet{
+  width:100%; max-width:640px; background:var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+  border:1px solid #33301f; box-shadow:0 18px 50px rgba(0,0,0,.55);
+  position:relative; padding:28px 22px 40px;
+}
+.sheet::before{
+  content:""; position:absolute; inset:8px; border:1px solid rgba(34,30,22,.35); pointer-events:none;
+}
+.masthead{ text-align:center; padding-bottom:18px; border-bottom:3px double var(--ink); margin-bottom:22px;}
+.masthead .tag{ font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.14em; font-size:11px; color:var(--red);}
+.masthead h1{ font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(24px,6vw,32px); margin:6px 0 2px; letter-spacing:.02em;}
+.masthead .sub{font-size:13px; color:#4b4636;}
+.stamp{
+  display:inline-block; margin-top:10px; border:2px solid var(--red); color:var(--red);
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:11px; letter-spacing:.1em;
+  padding:3px 10px; transform:rotate(-3deg); opacity:.85;
+}
+.score-block{ text-align:center; margin:4px 0 20px;}
+.score-num{ font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(40px,12vw,56px); line-height:1;}
+.score-label{font-size:12px; color:#4b4636; letter-spacing:.05em;}
+.bar-wrap{ margin:14px auto 4px; max-width:420px;}
+.bar-bg{ height:14px; background:#cfc4a2; border:1px solid var(--ink); position:relative;}
+.bar-fill{ height:100%; background:var(--green); transition:width .5s;}
+.bar-caption{ display:flex; justify-content:space-between; font-size:11px; margin-top:4px; color:#4b4636;}
+.section{ margin-top:26px;}
+.section h2{
+  font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; letter-spacing:.08em;
+  border-bottom:1px solid var(--line); padding-bottom:6px; margin-bottom:12px; color:var(--ink);
+}
+.mission-card{
+  background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative;
+}
+.mission-card .badge{
+  position:absolute; top:-11px; right:14px; background:var(--red); color:var(--paper);
+  font-family:'Oswald',sans-serif; font-size:10px; font-weight:600; letter-spacing:.08em;
+  padding:3px 9px; transform:rotate(2deg);
+}
+.mission-card h3{ font-family:'Oswald',sans-serif; font-size:18px; margin:4px 0 8px;}
+.mission-card p{ margin:6px 0; font-size:14px; line-height:1.5;}
+.mission-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.chip{ font-size:11px; border:1px solid var(--ink); padding:3px 8px; font-family:'Oswald',sans-serif;}
+.chip.pts{ background:var(--gold); border-color:var(--gold); color:#1c1706; font-weight:600;}
+.empty{ font-size:13px; color:#5b5540; font-style:italic; padding:8px 2px;}
+.hist-item, .ladder-item{
+  display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed var(--line); font-size:13px;
+}
+.hist-item:last-child, .ladder-item:last-child{ border-bottom:none;}
+.hist-item .pts{ color:var(--green); font-weight:700; white-space:nowrap;}
+.ladder-item.done{ color:#2f4a3b;}
+.ladder-item.done .pts{ text-decoration:none;}
+.ladder-item.locked{ color:#8a8262;}
+.ladder-item .pts{ font-family:'Oswald',sans-serif; font-weight:600; white-space:nowrap; min-width:56px;}
+.ladder-item .mark{ width:16px; text-align:center;}
+.ladder-scroll{ max-height:280px; overflow-y:auto; border:1px solid var(--line); padding:4px 10px; background:rgba(255,255,255,.15);}
+.gm-panel{ margin-top:30px; border-top:3px double var(--ink); padding-top:18px;}
+.gm-panel h2{ color:var(--red);}
+.field{ margin-bottom:10px;}
+.field label{ display:block; font-size:11px; letter-spacing:.05em; margin-bottom:3px; color:#4b4636; font-family:'Oswald',sans-serif;}
+.field input, .field textarea{
+  width:100%; font-family:'Special Elite', monospace; font-size:13px; padding:8px;
+  border:1px solid var(--ink); background:#fbf7ea;
+}
+.field textarea{ min-height:52px; resize:vertical;}
+.row2{ display:flex; gap:10px;}
+.row2>*{flex:1;}
+button{
+  font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; font-size:12px;
+  padding:10px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--paper);
+  cursor:pointer;
+}
+button.secondary{ background:transparent; color:var(--ink);}
+button.danger{ background:var(--red); border-color:var(--red);}
+.btn-row{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+.foot{ text-align:center; font-size:11px; color:#6b6549; margin-top:26px;}
+.locked-note{ font-size:11px; color:var(--red); margin-top:8px;}
+.mission-card.pending{ background:#e3d8b0; border-style:dashed;}
+.mission-card .badge.pending-badge{ background:var(--gold); color:#1c1706;}
+.hist-item{ align-items:center;}
+.hist-item .left{ display:flex; align-items:center; gap:8px; flex:1;}
+.iconbtn{ background:none; border:none; color:var(--red); font-size:14px; padding:2px 4px; cursor:pointer; font-family:inherit;}
+.iconbtn:hover{ opacity:.7;}
+</style>
+</head>
+<body>
+<div class="sheet" id="app">
+  <div class="masthead">
+    <div class="tag">Dossier classifié</div>
+    <h1>The Great Adventure</h1>
+    <div class="sub">Agent titulaire : L'Enquêteuse · Maître du Jeu habilité</div>
+    <div class="stamp">Confidentiel</div>
+  </div>
+
+  <div class="score-block">
+    <div class="score-num" id="score">0</div>
+    <div class="score-label">Points d'Expérience cumulés</div>
+    <div class="bar-wrap">
+      <div class="bar-bg"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+      <div class="bar-caption"><span id="barNow">0 pts</span><span id="barNext">— prochain palier —</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>En attente de validation</h2>
+    <div id="pendingZone"><div class="empty">Aucun Murder en attente.</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Mission en cours</h2>
+    <div id="activeZone"><div class="empty">Aucune mission active pour le moment.</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Registre des opérations passées</h2>
+    <div id="histZone"><div class="empty">Aucun Murder validé pour l'instant.</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Registre officiel des récompenses</h2>
+    <div class="ladder-scroll" id="ladderZone"></div>
+  </div>
+
+  <div id="gmPanel" style="display:none" class="gm-panel">
+    <h2>Poste de commandement — Maître du Jeu</h2>
+    <div class="field"><label>Titre du Murder</label><input id="fTitle" placeholder="Ex : La Mixologue Clandestine"></div>
+    <div class="field"><label>Mission</label><textarea id="fMission" placeholder="Décris la mission..."></textarea></div>
+    <div class="row2">
+      <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
+      <div class="field"><label>Chrono / contrainte (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
+    </div>
+    <div class="field"><label>Bonus / Malus (optionnel)</label><input id="fBonusMalus" placeholder="Ex : +10 pts si la photo est drôle / -20 pts si tu craques"></div>
+    <button id="btnPublish">Diffuser le Murder (en attente de validation)</button>
+
+    <div id="validateZone" style="display:none;margin-top:22px;border-top:1px dashed var(--line);padding-top:16px;">
+      <div class="field"><label>Ajustement manuel supplémentaire (optionnel, en plus du bonus/malus)</label><input id="fAdjust" type="number" placeholder="Ex : -10 ou +10"></div>
+      <div class="locked-note" style="color:#6b6549;">Utilise le bouton « ✔ Valider » directement sur la carte de la mission en cours ci-dessus.</div>
+    </div>
+  </div>
+
+  <div class="foot" id="statusLine">Chargement...</div>
+  <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
+</div>
+
+<script>
+  window.__fbReady = new Promise((resolve) => { window.__fbReadyResolve = resolve; });
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCE9X89zWHH7CaDviF584_2N1ISjVNehvo",
+    authDomain: "registre-des-privileges.firebaseapp.com",
+    databaseURL: "https://registre-des-privileges-default-rtdb.firebaseio.com",
+    projectId: "registre-des-privileges",
+    storageBucket: "registre-des-privileges.firebasestorage.app",
+    messagingSenderId: "576385399927",
+    appId: "1:576385399927:web:cfd2e0be98aa06dc845a72",
+    measurementId: "G-EC9LZ78T4G"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const fbDb = getFirestore(fbApp);
+  window.__fbDocRef = doc(fbDb, 'state', 'main');
+  window.__fbOnSnapshot = onSnapshot;
+  window.__fbSetDoc = setDoc;
+  window.__fbReadyResolve();
+</script>
+
+<script>
+const LADDER = [[200,"Massage de 15 minutes"],[400,"Pass « Exemption d'une tâche »"],[500,"Petit-déjeuner au lit"],[750,"Pique-nique en amoureux"],[1000,"Soirée film avec confiseries incluses"],[1250,"Massage complet de 30 minutes"],[1500,"Petit-déjeuner au lit"],[1750,"Massage de 15 minutes"],[2000,"Activité surprise préparée par le Maître du Jeu"],[2250,"Pass « Exemption d'une tâche »"],[2500,"1 cadeau au choix"],[2750,"Massage complet de 30 minutes"],[3000,"Sortie au cinéma"],[3250,"Massage de 15 minutes"],[3500,"Soirée cocktail / apéro maison"],[3750,"Massage complet de 30 minutes"],[4000,"Activité surprise préparée par le Maître du Jeu"],[4250,"Bouquet surprise"],[4500,"Petit-déjeuner au lit"],[4750,"Massage complet de 30 minutes"],[5000,"Un bon restaurant en amoureux"],[5250,"Massage de 15 minutes"],[5500,"1 cadeau au choix"],[5750,"Massage complet de 30 minutes"],[6000,"Activité surprise préparée par le Maître du Jeu"],[6250,"Massage de 15 minutes"],[6500,"Soirée cocktail / apéro maison"],[6750,"Massage complet de 30 minutes"],[7000,"Soirée film & plateau télé au choix"],[7250,"Massage de 15 minutes"],[7500,"Journée / activité surprise (spa, sortie fun...)"],[7750,"Massage complet de 30 minutes"],[8000,"Activité surprise préparée par le Maître du Jeu"],[8250,"Massage de 15 minutes"],[8500,"Bouquet surprise"],[8750,"Massage complet de 30 minutes"],[9000,"Sortie au cinéma"],[9250,"Massage de 15 minutes"],[9500,"Activité surprise préparée par le Maître du Jeu"],[9750,"Massage complet de 30 minutes"],[10000,"Week-end en amoureux à l'hôtel (2 nuits)"],[10250,"Massage de 15 minutes"],[10500,"Pique-nique en amoureux"],[10750,"Massage complet de 30 minutes"],[11000,"Soirée film avec confiseries incluses"],[11250,"Massage de 15 minutes"],[11500,"Soirée cocktail / apéro maison"],[11750,"Massage complet de 30 minutes"],[12000,"Activité surprise préparée par le Maître du Jeu"],[12250,"Massage de 15 minutes"],[12500,"1 cadeau au choix"],[12750,"Massage complet de 30 minutes"],[13000,"Sortie au cinéma"],[13250,"Massage de 15 minutes"],[13500,"Soirée cocktail / apéro maison"],[13750,"Massage complet de 30 minutes"],[14000,"Activité surprise préparée par le Maître du Jeu"],[14250,"Massage de 15 minutes"],[14500,"Bouquet surprise"],[14750,"Massage complet de 30 minutes"],[15000,"Repas gastronomique préparé par le chef Théo"],[15250,"Massage de 15 minutes"],[15500,"Pique-nique en amoureux"],[15750,"Massage complet de 30 minutes"],[16000,"1 cadeau au choix"],[16250,"Massage de 15 minutes"],[16500,"Activité surprise préparée par le Maître du Jeu"],[16750,"Massage complet de 30 minutes"],[17000,"Soirée film avec confiseries incluses"],[17250,"Massage de 15 minutes"],[17500,"Gros restaurant ($$$)"],[17750,"Massage complet de 30 minutes"],[18000,"Bouquet surprise"],[18250,"Massage de 15 minutes"],[18500,"1 cadeau au choix"],[18750,"Massage complet de 30 minutes"],[19000,"Soirée film avec confiseries incluses"],[19250,"Massage de 15 minutes"],[19500,"Soirée cocktail / apéro maison"],[19750,"Massage complet de 30 minutes"],[20000,"Voyage d'une semaine"]];
+
+let state = { totalPoints: 0, pending: null, active: null, history: [] };
+let pendingConfirmKey = null;
+let showBonusForm = false;
+function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
+function extractNumber(text){ const m = (text||'').match(/[-+]?\d+/); return m ? parseInt(m[0],10) : 0; }
+function finalizeValidate(bonusAdjust){
+  try{
+    if(!state.active) return;
+    const manual = parseInt((document.getElementById('fAdjust')||{}).value, 10) || 0;
+    const finalPts = Math.max(0, state.active.points + manual + (bonusAdjust||0));
+    state.history.push({ id: uid(), title: state.active.title, points: finalPts });
+    state.totalPoints += finalPts;
+    state.active = null;
+    showBonusForm = false;
+    const fa = document.getElementById('fAdjust'); if(fa) fa.value = '';
+    render();
+    save();
+  }catch(e){
+    console.error('finalizeValidate error', e);
+  }
+}
+let canEdit = false;
+let dbNs = null;
+let docRef = null;
+
+function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+
+function render(){
+  document.getElementById('score').textContent = state.totalPoints;
+
+  const nextTier = LADDER.find(t => t[0] > state.totalPoints);
+  const prevTier = [...LADDER].reverse().find(t => t[0] <= state.totalPoints);
+  const base = prevTier ? prevTier[0] : 0;
+  const top = nextTier ? nextTier[0] : base;
+  const pct = nextTier ? Math.min(100, Math.round(((state.totalPoints-base)/(top-base))*100)) : 100;
+  document.getElementById('barFill').style.width = pct+'%';
+  document.getElementById('barNow').textContent = state.totalPoints+' pts';
+  document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Tous les paliers atteints !';
+
+  const pz = document.getElementById('pendingZone');
+  if(state.pending){
+    const m = state.pending;
+    pz.innerHTML = `<div class="mission-card pending"><div class="badge pending-badge">En attente de validation</div>
+      <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
+      <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
+      <div class="btn-row"><button data-action="accept-pending">✔ Accepter</button><button class="secondary" data-action="reject-pending">✕ Refuser</button></div></div>`;
+  } else {
+    pz.innerHTML = '<div class="empty">Aucun Murder en attente.</div>';
+  }
+
+  const az = document.getElementById('activeZone');
+  if(state.active){
+    const m = state.active;
+    let controls = '';
+    if(canEdit){
+      if(pendingConfirmKey === 'delete-active'){
+        controls = `<div class="btn-row"><span style="font-size:12px;align-self:center;">Confirmer la suppression ?</span><button class="danger" data-action="confirm-delete-active">Oui, supprimer</button><button class="secondary" data-action="cancel-confirm">Non</button></div>`;
+      } else if(showBonusForm && m.bonusMalus){
+        const suggested = extractNumber(m.bonusMalus);
+        controls = `<div style="margin-top:12px;">
+          <div style="font-size:13px;margin-bottom:6px;">Bonus/Malus indiqué : « ${esc(m.bonusMalus)} »<br>Combien de points ajouter (+) ou retirer (−) ?</div>
+          <input id="bonusPts" type="number" value="${suggested}" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--ink);font-family:'Special Elite',monospace;font-size:13px;">
+          <div class="btn-row"><button data-action="confirm-validate-bonus">✔ Appliquer et valider</button><button class="secondary" data-action="confirm-validate-ignore">Ignorer et valider</button><button class="secondary" data-action="cancel-confirm">Annuler</button></div>
+        </div>`;
+      } else {
+        controls = `<div class="btn-row"><button data-action="validate-active">✔ Valider (+points)</button><button class="secondary" data-action="delete-active">🗑 Supprimer cette mission</button></div>`;
+      }
+    }
+    az.innerHTML = `<div class="mission-card"><div class="badge">Mission en cours</div>
+      <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
+      <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
+      ${controls}</div>`;
+  } else {
+    az.innerHTML = '<div class="empty">Aucune mission active pour le moment.</div>';
+  }
+
+  const hz = document.getElementById('histZone');
+  if(state.history.length){
+    hz.innerHTML = state.history.slice().reverse().map(h => {
+      const key = 'delete-history:'+h.id;
+      const right = pendingConfirmKey === key
+        ? `<span style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;">Supprimer ?</span><button class="iconbtn" data-action="confirm-delete-history" data-id="${h.id}" title="Confirmer">✔</button><button class="iconbtn" data-action="cancel-confirm" title="Annuler">✕</button></span>`
+        : `<span style="display:flex;align-items:center;gap:10px;"><span class="pts">+${h.points} pts</span>${canEdit?`<button class="iconbtn" data-action="delete-history" data-id="${h.id}" title="Supprimer">🗑</button>`:''}</span>`;
+      return `<div class="hist-item"><span class="left">${esc(h.title)}</span>${right}</div>`;
+    }).join('');
+  } else {
+    hz.innerHTML = '<div class="empty">Aucun Murder validé pour l\'instant.</div>';
+  }
+
+  document.getElementById('ladderZone').innerHTML = LADDER.map(([pts,label]) => {
+    const done = state.totalPoints >= pts;
+    return `<div class="ladder-item ${done?'done':'locked'}"><span class="mark">${done?'✔':'•'}</span><span style="flex:1">${esc(label)}</span><span class="pts">${pts} pts</span></div>`;
+  }).join('');
+
+  document.getElementById('validateZone').style.display = state.active ? 'block' : 'none';
+  document.getElementById('gmPanel').style.display = canEdit ? 'block' : 'none';
+}
+
+async function save(){
+  if(!docRef) return;
+  try{ await window.__fbSetDoc(docRef, state); }
+  catch(e){
+    console.error('save failed', e);
+    alert("Impossible d'enregistrer : " + (e && e.message ? e.message : e));
+  }
+}
+
+async function init(){
+  const params = new URLSearchParams(location.search);
+  canEdit = params.get('gm') === '1';
+  const sl = document.getElementById('statusLine');
+  if(sl) sl.textContent = canEdit ? 'Mode : Maître du Jeu' : 'Mode : Agent (lecture / réponse aux missions)';
+
+  await window.__fbReady;
+
+  try{
+    docRef = window.__fbDocRef;
+    window.__fbOnSnapshot(docRef, (snap) => {
+      if(snap && snap.exists()){
+        const d = snap.data();
+        const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v));
+        state = { totalPoints: d.totalPoints||0, pending: clone(d.pending)||null, active: clone(d.active)||null, history: clone(d.history)||[] };
+      }
+      render();
+    }, (err) => {
+      console.error('onSnapshot error', err);
+    });
+  }catch(e){ console.error(e); render(); }
+
+  render();
+
+  document.getElementById('btnPublish').onclick = () => {
+    const title = document.getElementById('fTitle').value.trim();
+    const mission = document.getElementById('fMission').value.trim();
+    const points = parseInt(document.getElementById('fPoints').value,10) || 0;
+    const meta = document.getElementById('fMeta').value.trim();
+    const bonusMalus = document.getElementById('fBonusMalus').value.trim();
+    if(!title || !mission){ alert('Titre et mission requis.'); return; }
+    state.pending = { title, mission, points, meta, bonusMalus };
+    render();
+    save();
+    document.getElementById('fTitle').value='';
+    document.getElementById('fMission').value='';
+    document.getElementById('fMeta').value='';
+    document.getElementById('fBonusMalus').value='';
+  };
+
+  document.getElementById('app').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if(!btn){ return; }
+    const action = btn.dataset.action;
+    try{
+    if(action === 'accept-pending'){
+      if(!state.pending) return;
+      state.active = state.pending;
+      state.pending = null;
+      render();
+      save();
+    } else if(action === 'reject-pending'){
+      state.pending = null;
+      render();
+      save();
+    } else if(action === 'validate-active'){
+      if(!state.active) return;
+      if(state.active.bonusMalus){
+        showBonusForm = true;
+        render();
+      } else {
+        finalizeValidate(0);
+      }
+    } else if(action === 'confirm-validate-bonus'){
+      const bonusPts = parseInt((document.getElementById('bonusPts')||{}).value, 10) || 0;
+      finalizeValidate(bonusPts);
+    } else if(action === 'confirm-validate-ignore'){
+      finalizeValidate(0);
+    } else if(action === 'delete-active'){
+      pendingConfirmKey = 'delete-active';
+      render();
+    } else if(action === 'confirm-delete-active'){
+      state.active = null;
+      pendingConfirmKey = null;
+      render();
+      save();
+    } else if(action === 'delete-history'){
+      pendingConfirmKey = 'delete-history:'+btn.dataset.id;
+      render();
+    } else if(action === 'confirm-delete-history'){
+      const id = btn.dataset.id;
+      const idx = state.history.findIndex(h => h.id === id);
+      if(idx !== -1){
+        state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
+        state.history.splice(idx,1);
+      }
+      pendingConfirmKey = null;
+      render();
+      save();
+    } else if(action === 'cancel-confirm'){
+      pendingConfirmKey = null;
+      showBonusForm = false;
+      render();
+    }
+    }catch(err){
+      console.error('click handler error ('+action+')', err);
+    }
+  });
+}
+init();
+</script>
+</body>
+</html>
