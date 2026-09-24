@@ -299,9 +299,14 @@ function render(){
 
 async function save(){
   if(!docRef) return;
-  try{ await window.__fbSetDoc(docRef, state); }
-  catch(e){
+  const diag = document.getElementById('diagLine');
+  if(diag) diag.textContent = 'Écriture en cours...';
+  try{
+    await window.__fbSetDoc(docRef, state);
+    if(diag) diag.textContent = 'Écrit avec succès à ' + new Date().toLocaleTimeString();
+  }catch(e){
     console.error('save failed', e);
+    if(diag) diag.textContent = 'ÉCHEC DE L\'ÉCRITURE : ' + (e && e.message ? e.message : e);
     alert("Impossible d'enregistrer : " + (e && e.message ? e.message : e));
   }
 }
