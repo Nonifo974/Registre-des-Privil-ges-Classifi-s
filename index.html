@@ -394,7 +394,15 @@ function render(){
   document.getElementById('gmPanel').style.display = canEdit ? 'block' : 'none';
 }
 
-async function save(){ if(!docRef) return; try{ await window.__fbSetDoc(docRef, state); }catch(e){ alert("Erreur d'enregistrement."); } }
+async function save(){ 
+  if(!docRef) return; 
+  
+  // NETTOYAGE AUTO: Si le score a baissé, on supprime de la mémoire les coupons supérieurs au nouveau score
+  if(state.claimed) state.claimed = state.claimed.filter(p => p <= state.totalPoints);
+  if(state.validatedCoupons) state.validatedCoupons = state.validatedCoupons.filter(p => p <= state.totalPoints);
+  
+  try{ await window.__fbSetDoc(docRef, state); }catch(e){ alert("Erreur d'enregistrement."); } 
+}
 
 async function init(){
   const params = new URLSearchParams(location.search); canEdit = params.get('gm') === '1';
@@ -404,13 +412,18 @@ async function init(){
     window.__fbOnSnapshot(docRef, (snap) => {
       if(snap && snap.exists()){
         const d = snap.data(); const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v)); const toArr = (v) => Array.isArray(v) ? clone(v) : (v ? [clone(v)] : []);
+        
+        const currentPoints = d.totalPoints || 0;
+        
         state = { 
-          totalPoints: d.totalPoints||0, 
+          totalPoints: currentPoints, 
           pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid()}), 
           active: toArr(d.active).map(item => item.id ? item : {...item, id: uid()}), 
           history: clone(d.history)||[],
-          claimed: Array.isArray(d.claimed) ? d.claimed : [],
-          validatedCoupons: Array.isArray(d.validatedCoupons) ? d.validatedCoupons : []
+          
+          // NETTOYAGE AUTO (Rétroactif) dès le chargement de Firebase
+          claimed: Array.isArray(d.claimed) ? d.claimed.filter(p => p <= currentPoints) : [],
+          validatedCoupons: Array.isArray(d.validatedCoupons) ? d.validatedCoupons.filter(p => p <= currentPoints) : []
         };
       }
       render();
@@ -507,11 +520,6 @@ async function init(){
         if(idx !== -1){
           state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
           state.history.splice(idx,1); 
-          
-          // NETTOYAGE DES COUPONS SI ON DESCEND SOUS LE PALIER
-          if(state.claimed) state.claimed = state.claimed.filter(p => p <= state.totalPoints);
-          if(state.validatedCoupons) state.validatedCoupons = state.validatedCoupons.filter(p => p <= state.totalPoints);
-          
           pendingConfirmKey = null; render(); save();
         }
       } else if(action === 'cancel-confirm'){
