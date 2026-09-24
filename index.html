@@ -114,7 +114,6 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
 .foot{ text-align:center; font-size:11px; color:inherit; opacity:0.6; margin-top:26px;}
 .mission-card.pending{ background:transparent; border-style:dashed;}
 .clue-box { margin-top:8px; padding:8px; border: 1px dashed var(--ink); background:rgba(0,0,0,0.05); font-size: 13px; }
-.proof-box { margin-top:10px; padding:10px; border: 1px solid var(--ink); background:rgba(0,0,0,0.03); font-size: 13px; }
 .coupon-btn { background: var(--gold); color: #1c1706; border-color: var(--gold); padding: 4px 12px; font-size: 11px; }
 .claimed-text { font-size: 11px; color: var(--green); font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.05em; }
 .iconbtn{ background:none; border:none; color:var(--red); font-size:14px; padding:2px 4px; cursor:pointer; font-family:inherit;}
@@ -179,7 +178,7 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
     
     <div class="row2">
       <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
-      <div class="field"><label>Chrono / contrainte (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
+      <div class="field"><label>Règlement (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
     </div>
     
     <div class="field">
@@ -193,14 +192,7 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
       </div>
     </div>
 
-    <div class="field" style="margin-top:16px;">
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px;">
-        <input type="checkbox" id="fRequireProof" style="width:auto;">
-        Exiger le dépôt d'une preuve photo pour valider
-      </label>
-    </div>
-
-    <button id="btnPublish" style="margin-top:8px;">Diffuser le Murder</button>
+    <button id="btnPublish" style="margin-top:16px;">Diffuser le Murder</button>
   </div>
 
   <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
@@ -286,7 +278,6 @@ function finalizeValidate(id, bonusAdjust){
     if(idx === -1) return;
     const item = state.active[idx];
     const finalPts = Math.max(0, item.points + (bonusAdjust||0));
-    // La preuve est VOLONTAIREMENT retirée ici pour ne pas surcharger la base de données
     state.history.push({ id: uid(), title: item.title, points: finalPts });
     state.totalPoints += finalPts;
     state.active.splice(idx, 1);
@@ -335,7 +326,7 @@ function render(){
   const az = document.getElementById('activeZone');
   if(state.active && state.active.length){
     az.innerHTML = state.active.map(m => {
-      let controls = '', clueHtml = '', proofHtml = '';
+      let controls = '', clueHtml = '';
 
       let metaHtml = ''; if(m.meta) metaHtml = `<div class="chip-col"><span class="chip-label">Règlement</span><span class="chip">${esc(m.meta)}</span></div>`;
       let bmHtml = ''; if(m.bonusMalus) bmHtml = `<div class="chip-col"><span class="chip-label">${m.bmType === 'Malus' ? 'Malus' : 'Bonus'}</span><span class="chip">${esc(m.bonusMalus)}</span></div>`;
@@ -343,23 +334,6 @@ function render(){
       if (m.clue) {
         if (m.clueRevealed) clueHtml = `<div class="clue-box">🔍 Indice révélé : <strong>${esc(m.clue)}</strong></div>`;
         else clueHtml = `<button class="secondary" data-action="reveal-clue" data-id="${m.id}" data-penalty="${m.cluePenalty}" style="margin-top:8px;font-size:11px;padding:4px 8px;">❓ Réclamer un indice (-${m.cluePenalty} pts)</button>`;
-      }
-
-      if (m.requireProof) {
-        if (!canEdit) {
-          if (m.proof) { proofHtml = `<div class="proof-box">📸 Photo transmise ! <span style="font-size:11px;color:var(--green);">En attente de validation du MJ</span></div>`; } 
-          else {
-            proofHtml = `<div style="margin-top:12px;">
-              <label class="secondary" style="display:inline-block; cursor:pointer; padding:6px 12px; border:1px solid var(--ink); font-size:12px; font-family:'Oswald',sans-serif;">
-                📸 Joindre une photo (Preuve)
-                <input type="file" accept="image/*" style="display:none;" data-action="upload-proof" data-id="${m.id}">
-              </label>
-            </div>`;
-          }
-        } else {
-          if (m.proof) { proofHtml = `<div class="proof-box" style="border-left: 3px solid var(--gold);"><strong>📸 Preuve transmise :</strong><br><img src="${m.proof}" style="max-width:100%; border:1px solid var(--ink); margin-top:8px;"></div>`; }
-          else { proofHtml = `<div class="proof-box" style="opacity:0.6;"><em>📸 Preuve requise : En attente du dépôt par l'Agent...</em></div>`; }
-        }
       }
 
       if(canEdit){
@@ -379,7 +353,7 @@ function render(){
       return `<div class="mission-card"><div class="badge">Mission en cours</div>
         <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
         <div class="mission-meta"><div class="chip-col"><span class="chip-label">Gain</span><span class="chip pts">${m.points} pts</span></div>${metaHtml}${bmHtml}</div>
-        ${clueHtml} ${proofHtml} ${controls}</div>`;
+        ${clueHtml} ${controls}</div>`;
     }).join('');
   } else { az.innerHTML = '<div class="empty">Aucune mission active pour le moment.</div>'; }
 
@@ -452,18 +426,16 @@ async function init(){
     const meta = document.getElementById('fMeta').value.trim();
     const bmType = document.getElementById('fBmType').value;
     const bonusMalus = document.getElementById('fBonusMalus').value.trim();
-    const requireProof = document.getElementById('fRequireProof').checked;
     
     if(!title || !mission){ alert('Titre et mission requis.'); return; }
     if (!Array.isArray(state.pending)) state.pending = [];
     
-    state.pending.push({ id: uid(), title, mission, clue, cluePenalty, clueRevealed: false, requireProof, proof: '', points, meta, bmType, bonusMalus });
+    state.pending.push({ id: uid(), title, mission, clue, cluePenalty, clueRevealed: false, points, meta, bmType, bonusMalus });
     playSound('typewriter'); render(); save();
 
     document.getElementById('fTitle').value=''; document.getElementById('fMission').value='';
     document.getElementById('fClue').value=''; document.getElementById('fCluePenalty').value=''; 
     document.getElementById('fMeta').value=''; document.getElementById('fBonusMalus').value='';
-    document.getElementById('fRequireProof').checked = false;
 
     fetch('https://ntfy.sh/', {
       method: 'POST', body: JSON.stringify({
@@ -474,44 +446,6 @@ async function init(){
       })
     }).catch(e=>e);
   };
-
-  // Upload Photo event delegation
-  document.getElementById('app').addEventListener('change', (e) => {
-    if (e.target.dataset.action === 'upload-proof') {
-      const id = e.target.dataset.id;
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const max = 600; // Redimensionnement pour ne pas bloquer Firebase
-          let w = img.width, h = img.height;
-          if (w > max || h > max) { if (w > h) { h *= max / w; w = max; } else { w *= max / h; h = max; } }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          const base64 = canvas.toDataURL('image/jpeg', 0.5); // Compression à 50%
-          
-          const item = state.active.find(m => m.id === id);
-          if (item) {
-            item.proof = base64;
-            render(); save();
-            fetch('https://ntfy.sh/', {
-              method: 'POST', body: JSON.stringify({
-                topic: 'great-adventure-081', title: '📸 Preuve envoyée !', message: `L'Enquêteuse a soumis sa preuve photo.`,
-                priority: 3, tags: ['camera', 'mag'], click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
-              })
-            }).catch(e=>e);
-          }
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
 
   document.getElementById('app').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
@@ -550,7 +484,7 @@ async function init(){
           render(); save();
           fetch('https://ntfy.sh/', {
             method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-081', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
+              topic: 'great-adventure-0810-mj', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
               priority: 4, tags: ['tada', 'ticket'], click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
             })
           }).catch(e=>e);
@@ -572,7 +506,13 @@ async function init(){
         const idx = state.history.findIndex(h => h.id === id);
         if(idx !== -1){
           state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
-          state.history.splice(idx,1); pendingConfirmKey = null; render(); save();
+          state.history.splice(idx,1); 
+          
+          // NETTOYAGE DES COUPONS SI ON DESCEND SOUS LE PALIER
+          if(state.claimed) state.claimed = state.claimed.filter(p => p <= state.totalPoints);
+          if(state.validatedCoupons) state.validatedCoupons = state.validatedCoupons.filter(p => p <= state.totalPoints);
+          
+          pendingConfirmKey = null; render(); save();
         }
       } else if(action === 'cancel-confirm'){
         pendingConfirmKey = null; render();
