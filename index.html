@@ -688,13 +688,8 @@ async function init(){
     try{
       if(action === 'accept-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
-        if(idx !== -1){ 
-          const acceptedItem = state.pending[idx];
-          state.active.push(state.pending.splice(idx, 1)[0]); 
-          render(); save(); 
-
-          // 🔔 NOTIFICATION DISCRÈTE (Acceptation de murder)
-          fetch('https://ntfy.sh/', {
+        if(idx !== -1){ state.active.push(state.pending.splice(idx, 1)[0]); render(); save(); }
+	fetch('https://ntfy.sh/', {
             method: 'POST', body: JSON.stringify({
               topic: 'great-adventure-0810-mj', 
               title: '🕵️‍♀️ Mission acceptée', 
@@ -702,9 +697,6 @@ async function init(){
               priority: 2, 
               tags: ['eyes', 'memo']
             })
-          }).catch(e=>e);
-        }
-      }
       } else if(action === 'reject-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){ 
