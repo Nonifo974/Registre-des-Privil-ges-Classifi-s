@@ -6,13 +6,30 @@
 <title>Dossier — The Great Adventure</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Librairie pour l'effet confettis -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-:root{
+:root {
   --bg:#15140f; --paper:#e9e0c8; --paper2:#ddd2b3; --ink:#221e16;
   --red:#9c2b26; --gold:#b8924f; --green:#41564a; --line:#c9bd98;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
+/* THÈME VISION NOCTURNE (TERMINAL) */
+[data-theme="terminal"] {
+  --bg: #000000; --paper: #081408; --paper2: #0b1f0b; --ink: #33ff33;
+  --red: #ff3333; --gold: #ffff33; --green: #33ff33; --line: #1a4d1a;
+  --shell: #000000;
+  text-shadow: 0 0 3px rgba(51, 255, 51, 0.4);
+}
+[data-theme="terminal"] body { font-weight: 600; }
+[data-theme="terminal"] .sheet { background-image: none; box-shadow: 0 0 40px rgba(51,255,51,0.15); border: 1px solid var(--line); }
+[data-theme="terminal"] button { background: #0b1f0b; border-color: var(--ink); color: var(--ink); text-shadow: none; }
+[data-theme="terminal"] button:hover { background: var(--ink); color: #000; }
+[data-theme="terminal"] .chip.pts { background: var(--ink); color: #000; }
+[data-theme="terminal"] .badge { background: var(--red); color: #000; }
+[data-theme="terminal"] .stamp { opacity: 1; border-color: var(--red); box-shadow: 0 0 5px var(--red); text-shadow: none; }
+
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --shell:#0b0a08; } }
 @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --shell:#0b0a08; } }
 :root{ --shell:#0b0a08; }
@@ -25,18 +42,17 @@ body{
 }
 .sheet{
   width:100%; max-width:640px; background:var(--paper);
-  background-image:
-    repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
   border:1px solid #33301f; box-shadow:0 18px 50px rgba(0,0,0,.55);
-  position:relative; padding:28px 22px 40px;
+  position:relative; padding:28px 22px 40px; transition: all 0.3s ease;
 }
-.sheet::before{
-  content:""; position:absolute; inset:8px; border:1px solid rgba(34,30,22,.35); pointer-events:none;
-}
-.masthead{ text-align:center; padding-bottom:18px; border-bottom:3px double var(--ink); margin-bottom:22px;}
+.sheet::before{ content:""; position:absolute; inset:8px; border:1px solid rgba(34,30,22,.35); pointer-events:none; }
+.top-controls { position:absolute; top:12px; right:12px; display:flex; gap:8px; z-index:10; }
+.top-controls button { padding:4px 8px; font-size:16px; background:transparent; border:1px solid var(--ink); color:var(--ink); border-radius:4px; cursor:pointer; }
+.masthead{ text-align:center; padding-bottom:18px; border-bottom:3px double var(--ink); margin-bottom:22px; position:relative; }
 .masthead .tag{ font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.14em; font-size:11px; color:var(--red);}
 .masthead h1{ font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(24px,6vw,32px); margin:6px 0 2px; letter-spacing:.02em;}
-.masthead .sub{font-size:13px; color:#4b4636;}
+.masthead .sub{font-size:13px; color:inherit; opacity: 0.8;}
 .stamp{
   display:inline-block; margin-top:10px; border:2px solid var(--red); color:var(--red);
   font-family:'Oswald',sans-serif; font-weight:700; font-size:11px; letter-spacing:.1em;
@@ -44,19 +60,18 @@ body{
 }
 .score-block{ text-align:center; margin:4px 0 20px;}
 .score-num{ font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(40px,12vw,56px); line-height:1;}
-.score-label{font-size:12px; color:#4b4636; letter-spacing:.05em;}
+.score-label{font-size:12px; color:inherit; opacity:0.8; letter-spacing:.05em;}
 .bar-wrap{ margin:14px auto 4px; max-width:420px;}
 .bar-bg{ height:14px; background:#cfc4a2; border:1px solid var(--ink); position:relative;}
+[data-theme="terminal"] .bar-bg { background: #0a1f0a; }
 .bar-fill{ height:100%; background:var(--green); transition:width .5s;}
-.bar-caption{ display:flex; justify-content:space-between; font-size:11px; margin-top:4px; color:#4b4636;}
+.bar-caption{ display:flex; justify-content:space-between; font-size:11px; margin-top:4px; color:inherit; opacity:0.8;}
 .section{ margin-top:26px;}
 .section h2{
   font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; letter-spacing:.08em;
   border-bottom:1px solid var(--line); padding-bottom:6px; margin-bottom:12px; color:var(--ink);
 }
-.mission-card{
-  background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative; margin-bottom:12px;
-}
+.mission-card{ background:var(--paper2); border:1px solid var(--ink); padding:16px; position:relative; margin-bottom:12px; }
 .mission-card:last-child{ margin-bottom:0; }
 .mission-card .badge{
   position:absolute; top:-11px; right:14px; background:var(--red); color:var(--paper);
@@ -68,49 +83,51 @@ body{
 .mission-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
 .chip{ font-size:11px; border:1px solid var(--ink); padding:3px 8px; font-family:'Oswald',sans-serif;}
 .chip.pts{ background:var(--gold); border-color:var(--gold); color:#1c1706; font-weight:600;}
-.empty{ font-size:13px; color:#5b5540; font-style:italic; padding:8px 2px;}
-.hist-item, .ladder-item{
-  display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed var(--line); font-size:13px;
-}
+.empty{ font-size:13px; color:inherit; opacity:0.7; font-style:italic; padding:8px 2px;}
+.hist-item, .ladder-item{ display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed var(--line); font-size:13px; align-items: center;}
 .hist-item:last-child, .ladder-item:last-child{ border-bottom:none;}
 .hist-item .pts{ color:var(--green); font-weight:700; white-space:nowrap;}
-.ladder-item.done{ color:#2f4a3b;}
-.ladder-item.done .pts{ text-decoration:none;}
-.ladder-item.locked{ color:#8a8262;}
+.ladder-item.done{ color:inherit; }
+.ladder-item.done .mark { color: var(--green); }
+.ladder-item.locked{ color:inherit; opacity:0.5;}
 .ladder-item .pts{ font-family:'Oswald',sans-serif; font-weight:600; white-space:nowrap; min-width:56px;}
 .ladder-item .mark{ width:16px; text-align:center;}
-.ladder-scroll{ max-height:280px; overflow-y:auto; border:1px solid var(--line); padding:4px 10px; background:rgba(255,255,255,.15);}
+.ladder-scroll{ max-height:280px; overflow-y:auto; border:1px solid var(--line); padding:4px 10px; background:rgba(0,0,0,.05);}
 .gm-panel{ margin-top:30px; border-top:3px double var(--ink); padding-top:18px;}
 .gm-panel h2{ color:var(--red);}
 .field{ margin-bottom:10px;}
-.field label{ display:block; font-size:11px; letter-spacing:.05em; margin-bottom:3px; color:#4b4636; font-family:'Oswald',sans-serif;}
+.field label{ display:block; font-size:11px; letter-spacing:.05em; margin-bottom:3px; color:inherit; opacity:0.8; font-family:'Oswald',sans-serif;}
 .field input, .field textarea{
   width:100%; font-family:'Special Elite', monospace; font-size:13px; padding:8px;
-  border:1px solid var(--ink); background:#fbf7ea;
+  border:1px solid var(--ink); background:transparent; color:var(--ink);
 }
 .field textarea{ min-height:52px; resize:vertical;}
 .row2{ display:flex; gap:10px;}
 .row2>*{flex:1;}
 button{
   font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; font-size:12px;
-  padding:10px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--paper);
-  cursor:pointer;
+  padding:10px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--paper); cursor:pointer;
 }
 button.secondary{ background:transparent; color:var(--ink);}
-button.danger{ background:var(--red); border-color:var(--red);}
+button.danger{ background:var(--red); border-color:var(--red); color:var(--paper);}
 .btn-row{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
-.foot{ text-align:center; font-size:11px; color:#6b6549; margin-top:26px;}
-.locked-note{ font-size:11px; color:var(--red); margin-top:8px;}
-.mission-card.pending{ background:#e3d8b0; border-style:dashed;}
-.mission-card .badge.pending-badge{ background:var(--gold); color:#1c1706;}
-.hist-item{ align-items:center;}
-.hist-item .left{ display:flex; align-items:center; gap:8px; flex:1;}
+.foot{ text-align:center; font-size:11px; color:inherit; opacity:0.6; margin-top:26px;}
+.mission-card.pending{ background:transparent; border-style:dashed;}
+.clue-box { margin-top:8px; padding:8px; border: 1px dashed var(--ink); background:rgba(0,0,0,0.05); font-size: 13px; }
+.proof-box { margin-top:10px; padding:10px; border: 1px solid var(--ink); background:rgba(0,0,0,0.03); font-size: 13px; }
+.coupon-btn { background: var(--gold); color: #1c1706; border-color: var(--gold); padding: 4px 12px; font-size: 11px; }
+.claimed-text { font-size: 11px; color: var(--green); font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.05em; }
 .iconbtn{ background:none; border:none; color:var(--red); font-size:14px; padding:2px 4px; cursor:pointer; font-family:inherit;}
 .iconbtn:hover{ opacity:.7;}
 </style>
 </head>
 <body>
 <div class="sheet" id="app">
+  <div class="top-controls">
+    <button id="btnTheme" title="Vision Nocturne / Classique">👁️</button>
+    <button id="btnMute" title="Activer/Désactiver le son">🔊</button>
+  </div>
+
   <div class="masthead">
     <div class="tag">Dossier classifié</div>
     <h1>The Great Adventure</h1>
@@ -151,21 +168,15 @@ button.danger{ background:var(--red); border-color:var(--red);}
     <h2>Poste de commandement — Maître du Jeu</h2>
     <div class="field"><label>Titre du Murder</label><input id="fTitle" placeholder="Ex : La Mixologue Clandestine"></div>
     <div class="field"><label>Mission</label><textarea id="fMission" placeholder="Décris la mission..."></textarea></div>
+    <div class="field"><label>Indice caché (optionnel)</label><input id="fClue" placeholder="Sera révélé contre -5 pts si l'Agent bloque"></div>
     <div class="row2">
       <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
       <div class="field"><label>Chrono / contrainte (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
     </div>
     <div class="field"><label>Bonus / Malus (optionnel)</label><input id="fBonusMalus" placeholder="Ex : +10 pts si la photo est drôle / -20 pts si tu craques"></div>
     <button id="btnPublish">Diffuser le Murder</button>
-
-    <div id="validateZone" style="display:none;margin-top:22px;border-top:1px dashed var(--line);padding-top:16px;">
-      <div class="field"><label>Ajustement manuel supplémentaire (optionnel)</label><input id="fAdjust" type="number" placeholder="Ex : -10 ou +10"></div>
-      <div class="locked-note" style="color:#6b6549;">Utilise le bouton « ✔ Valider » directement sur la carte de la mission en cours ci-dessus.</div>
-    </div>
   </div>
 
-  <div class="foot" id="statusLine">Chargement...</div>
-  <div class="foot" id="diagLine" style="color:#8a3b2e;"></div>
   <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
 </div>
 
@@ -199,33 +210,68 @@ button.danger{ background:var(--red); border-color:var(--red);}
 <script>
 const LADDER = [[200,"Massage de 15 minutes"],[400,"Pass « Exemption d'une tâche »"],[500,"Petit-déjeuner au lit"],[750,"Pique-nique en amoureux"],[1000,"Soirée film avec confiseries incluses"],[1250,"Massage complet de 30 minutes"],[1500,"Petit-déjeuner au lit"],[1750,"Massage de 15 minutes"],[2000,"Activité surprise préparée par le Maître du Jeu"],[2250,"Pass « Exemption d'une tâche »"],[2500,"1 cadeau au choix"],[2750,"Massage complet de 30 minutes"],[3000,"Sortie au cinéma"],[3250,"Massage de 15 minutes"],[3500,"Soirée cocktail / apéro maison"],[3750,"Massage complet de 30 minutes"],[4000,"Activité surprise préparée par le Maître du Jeu"],[4250,"Bouquet surprise"],[4500,"Petit-déjeuner au lit"],[4750,"Massage complet de 30 minutes"],[5000,"Un bon restaurant en amoureux"],[5250,"Massage de 15 minutes"],[5500,"1 cadeau au choix"],[5750,"Massage complet de 30 minutes"],[6000,"Activité surprise préparée par le Maître du Jeu"],[6250,"Massage de 15 minutes"],[6500,"Soirée cocktail / apéro maison"],[6750,"Massage complet de 30 minutes"],[7000,"Soirée film & plateau télé au choix"],[7250,"Massage de 15 minutes"],[7500,"Journée / activité surprise (spa, sortie fun...)"],[7750,"Massage complet de 30 minutes"],[8000,"Activité surprise préparée par le Maître du Jeu"],[8250,"Massage de 15 minutes"],[8500,"Bouquet surprise"],[8750,"Massage complet de 30 minutes"],[9000,"Sortie au cinéma"],[9250,"Massage de 15 minutes"],[9500,"Activité surprise préparée par le Maître du Jeu"],[9750,"Massage complet de 30 minutes"],[10000,"Week-end en amoureux à l'hôtel (2 nuits)"],[10250,"Massage de 15 minutes"],[10500,"Pique-nique en amoureux"],[10750,"Massage complet de 30 minutes"],[11000,"Soirée film avec confiseries incluses"],[11250,"Massage de 15 minutes"],[11500,"Soirée cocktail / apéro maison"],[11750,"Massage complet de 30 minutes"],[12000,"Activité surprise préparée par le Maître du Jeu"],[12250,"Massage de 15 minutes"],[12500,"1 cadeau au choix"],[12750,"Massage complet de 30 minutes"],[13000,"Sortie au cinéma"],[13250,"Massage de 15 minutes"],[13500,"Soirée cocktail / apéro maison"],[13750,"Massage complet de 30 minutes"],[14000,"Activité surprise préparée par le Maître du Jeu"],[14250,"Massage de 15 minutes"],[14500,"Bouquet surprise"],[14750,"Massage complet de 30 minutes"],[15000,"Repas gastronomique préparé par le chef Théo"],[15250,"Massage de 15 minutes"],[15500,"Pique-nique en amoureux"],[15750,"Massage complet de 30 minutes"],[16000,"1 cadeau au choix"],[16250,"Massage de 15 minutes"],[16500,"Activité surprise préparée par le Maître du Jeu"],[16750,"Massage complet de 30 minutes"],[17000,"Soirée film avec confiseries incluses"],[17250,"Massage de 15 minutes"],[17500,"Gros restaurant ($$$)"],[17750,"Massage complet de 30 minutes"],[18000,"Bouquet surprise"],[18250,"Massage de 15 minutes"],[18500,"1 cadeau au choix"],[18750,"Massage complet de 30 minutes"],[19000,"Soirée film avec confiseries incluses"],[19250,"Massage de 15 minutes"],[19500,"Soirée cocktail / apéro maison"],[19750,"Massage complet de 30 minutes"],[20000,"Voyage d'une semaine"]];
 
-let state = { totalPoints: 0, pending: [], active: [], history: [] };
+let state = { totalPoints: 0, pending: [], active: [], history: [], claimed: [] };
 let pendingConfirmKey = null;
-function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
-function extractNumber(text){ const m = (text||'').match(/[-+]?\d+/); return m ? parseInt(m[0],10) : 0; }
-
-function finalizeValidate(id, bonusAdjust){
-  try{
-    const idx = state.active.findIndex(m => m.id === id);
-    if(idx === -1) return;
-    const item = state.active[idx];
-    const manual = parseInt((document.getElementById('fAdjust')||{}).value, 10) || 0;
-    const finalPts = Math.max(0, item.points + manual + (bonusAdjust||0));
-    state.history.push({ id: uid(), title: item.title, points: finalPts });
-    state.totalPoints += finalPts;
-    state.active.splice(idx, 1);
-    pendingConfirmKey = null;
-    const fa = document.getElementById('fAdjust'); if(fa) fa.value = '';
-    render();
-    save();
-  }catch(e){
-    console.error('finalizeValidate error', e);
-  }
-}
-
 let canEdit = false;
 let docRef = null;
 
+/* SYSTÈME DE SON (Généré dynamiquement sans fichiers audio) */
+let isMuted = localStorage.getItem('tga_muted') === '1';
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+}
+function playSound(type) {
+  if (isMuted) return;
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  
+  if (type === 'typewriter') { // Bruit mécanique
+    const bufferSize = audioCtx.sampleRate * 0.04;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+    const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 1000;
+    const nGain = audioCtx.createGain(); nGain.gain.setValueAtTime(1, t); nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+    noise.connect(filter); filter.connect(nGain); nGain.connect(audioCtx.destination);
+    noise.start(t);
+  } else if (type === 'stamp') { // Coup lourd de tampon
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+    gain.gain.setValueAtTime(1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+    osc.start(t); osc.stop(t + 0.15);
+  } else if (type === 'victory') { // Jingle Agent
+    osc.type = 'triangle';
+    gain.gain.setValueAtTime(0.4, t); gain.gain.linearRampToValueAtTime(0, t + 0.6);
+    osc.frequency.setValueAtTime(440, t);
+    osc.frequency.setValueAtTime(554.37, t + 0.15);
+    osc.frequency.setValueAtTime(659.25, t + 0.3);
+    osc.frequency.setValueAtTime(880, t + 0.45);
+    osc.start(t); osc.stop(t + 0.6);
+  }
+}
+
+/* THÈME & MUTE TOGGLE */
+let isDark = localStorage.getItem('tga_dark') === '1';
+function applyTheme() {
+  if (isDark) document.documentElement.setAttribute('data-theme', 'terminal');
+  else document.documentElement.removeAttribute('data-theme');
+}
+function applyMute() { document.getElementById('btnMute').textContent = isMuted ? '🔇' : '🔊'; }
+applyTheme(); applyMute();
+document.getElementById('btnTheme').onclick = () => { isDark = !isDark; localStorage.setItem('tga_dark', isDark ? '1' : '0'); applyTheme(); };
+document.getElementById('btnMute').onclick = () => { isMuted = !isMuted; localStorage.setItem('tga_muted', isMuted ? '1' : '0'); applyMute(); };
+
+function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
 function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 function render(){
@@ -238,13 +284,14 @@ function render(){
   const pct = nextTier ? Math.min(100, Math.round(((state.totalPoints-base)/(top-base))*100)) : 100;
   document.getElementById('barFill').style.width = pct+'%';
   document.getElementById('barNow').textContent = state.totalPoints+' pts';
-  document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Tous les paliers atteints !';
+  document.getElementById('barNext').textContent = nextTier ? nextTier[1]+' à '+nextTier[0]+' pts' : 'Paliers atteints !';
 
+  // ZONE ATTENTE
   const pz = document.getElementById('pendingZone');
   if(state.pending && state.pending.length){
     pz.innerHTML = state.pending.map(m => `
       <div class="mission-card pending">
-        <div class="badge pending-badge">En attente de validation</div>
+        <div class="badge" style="background:var(--gold);color:#000;">En attente</div>
         <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
         <div class="mission-meta">
           <span class="chip pts">${m.points} pts</span>
@@ -261,84 +308,107 @@ function render(){
     pz.innerHTML = '<div class="empty">Aucun Murder en attente.</div>';
   }
 
+  // ZONE ACTIVE (Missions en cours avec Indices et Preuves)
   const az = document.getElementById('activeZone');
   if(state.active && state.active.length){
     az.innerHTML = state.active.map(m => {
       let controls = '';
+      let clueHtml = '';
+      let proofHtml = '';
+
+      // Affichage de l'indice
+      if (m.clue) {
+        if (m.clueRevealed) clueHtml = `<div class="clue-box">🔍 Indice révélé : <strong>${esc(m.clue)}</strong></div>`;
+        else clueHtml = `<button class="secondary" data-action="reveal-clue" data-id="${m.id}" style="margin-top:8px;font-size:11px;padding:4px 8px;">❓ Réclamer un indice (-5 pts)</button>`;
+      }
+
+      // Affichage du système de preuve
+      if (!canEdit) {
+        if (m.proof) {
+          proofHtml = `<div class="proof-box">📄 Rapport envoyé : <em>"${esc(m.proof)}"</em> <br><span style="font-size:11px;color:var(--green);">En attente de validation du MJ</span></div>`;
+        } else {
+          proofHtml = `<div style="margin-top:12px;"><textarea id="proof_${m.id}" placeholder="Transmettre le rapport d'opération ou le lien d'une photo..." style="width:100%;font-size:12px;min-height:40px;margin-bottom:6px;"></textarea>
+          <button data-action="submit-proof" data-id="${m.id}">📤 Envoyer le rapport (Preuve)</button></div>`;
+        }
+      } else {
+        if (m.proof) proofHtml = `<div class="proof-box" style="border-left: 3px solid var(--gold);"><strong>📄 Rapport de l'Agent :</strong><br>${esc(m.proof)}</div>`;
+      }
+
+      // Boutons d'action (GM)
       if(canEdit){
         if(pendingConfirmKey === 'delete-active:' + m.id){
           controls = `<div class="btn-row"><span style="font-size:12px;align-self:center;">Confirmer la suppression ?</span><button class="danger" data-action="confirm-delete-active" data-id="${m.id}">Oui, supprimer</button><button class="secondary" data-action="cancel-confirm">Non</button></div>`;
-        } else if(pendingConfirmKey === 'bonus-active:' + m.id && m.bonusMalus){
-          const suggested = extractNumber(m.bonusMalus);
-          controls = `<div style="margin-top:12px;">
-            <div style="font-size:13px;margin-bottom:6px;">Bonus/Malus indiqué : « ${esc(m.bonusMalus)} »<br>Combien de points ajouter (+) ou retirer (−) ?</div>
-            <input id="bonusPts_${m.id}" type="number" value="${suggested}" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--ink);font-family:'Special Elite',monospace;font-size:13px;">
-            <div class="btn-row"><button data-action="confirm-validate-bonus" data-id="${m.id}">✔ Appliquer et valider</button><button class="secondary" data-action="confirm-validate-ignore" data-id="${m.id}">Ignorer et valider</button><button class="secondary" data-action="cancel-confirm">Annuler</button></div>
-          </div>`;
         } else {
-          controls = `<div class="btn-row"><button data-action="validate-active" data-id="${m.id}">✔ Valider (+points)</button><button class="secondary" data-action="delete-active" data-id="${m.id}">🗑 Supprimer cette mission</button></div>`;
+          controls = `<div class="btn-row" style="margin-top:14px;"><button data-action="validate-active" data-id="${m.id}">✔ Valider (+${m.points} pts)</button><button class="secondary" data-action="delete-active" data-id="${m.id}">🗑 Supprimer</button></div>`;
         }
       }
+      
       return `<div class="mission-card"><div class="badge">Mission en cours</div>
         <h3>${esc(m.title)}</h3><p>${esc(m.mission)}</p>
         <div class="mission-meta"><span class="chip pts">${m.points} pts</span>${m.meta?`<span class="chip">${esc(m.meta)}</span>`:''}${m.bonusMalus?`<span class="chip">${esc(m.bonusMalus)}</span>`:''}</div>
+        ${clueHtml}
+        ${proofHtml}
         ${controls}</div>`;
     }).join('');
   } else {
     az.innerHTML = '<div class="empty">Aucune mission active pour le moment.</div>';
   }
 
+  // HISTORIQUE
   const hz = document.getElementById('histZone');
   if(state.history.length){
     hz.innerHTML = state.history.slice().reverse().map(h => {
       const key = 'delete-history:'+h.id;
       const right = pendingConfirmKey === key
-        ? `<span style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;">Supprimer ?</span><button class="iconbtn" data-action="confirm-delete-history" data-id="${h.id}" title="Confirmer">✔</button><button class="iconbtn" data-action="cancel-confirm" title="Annuler">✕</button></span>`
-        : `<span style="display:flex;align-items:center;gap:10px;"><span class="pts">+${h.points} pts</span>${canEdit?`<button class="iconbtn" data-action="delete-history" data-id="${h.id}" title="Supprimer">🗑</button>`:''}</span>`;
+        ? `<span style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;">Supprimer ?</span><button class="iconbtn" data-action="confirm-delete-history" data-id="${h.id}">✔</button><button class="iconbtn" data-action="cancel-confirm">✕</button></span>`
+        : `<span style="display:flex;align-items:center;gap:10px;"><span class="pts">+${h.points} pts</span>${canEdit?`<button class="iconbtn" data-action="delete-history" data-id="${h.id}">🗑</button>`:''}</span>`;
       return `<div class="hist-item"><span class="left">${esc(h.title)}</span>${right}</div>`;
     }).join('');
   } else {
     hz.innerHTML = '<div class="empty">Aucun Murder validé pour l\'instant.</div>';
   }
 
+  // REGISTRE DES PRIVILÈGES
   document.getElementById('ladderZone').innerHTML = LADDER.map(([pts,label]) => {
     const done = state.totalPoints >= pts;
-    return `<div class="ladder-item ${done?'done':'locked'}"><span class="mark">${done?'✔':'•'}</span><span style="flex:1">${esc(label)}</span><span class="pts">${pts} pts</span></div>`;
+    const claimed = (state.claimed || []).includes(pts);
+    let actionHtml = '';
+    if (done && !claimed) {
+      actionHtml = `<button class="coupon-btn" data-action="claim-reward" data-pts="${pts}">🎟 Utiliser ce coupon</button>`;
+    } else if (done && claimed) {
+      actionHtml = `<span class="claimed-text">⚙️ Exécution en cours par le MJ</span>`;
+    }
+    return `<div class="ladder-item ${done?'done':'locked'}">
+      <div style="display:flex; justify-content:space-between; width:100%; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="mark">${done?'✔':'•'}</span><span>${esc(label)}</span>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          ${actionHtml}
+          <span class="pts">${pts} pts</span>
+        </div>
+      </div>
+    </div>`;
   }).join('');
 
-  document.getElementById('validateZone').style.display = (state.active && state.active.length) ? 'block' : 'none';
   document.getElementById('gmPanel').style.display = canEdit ? 'block' : 'none';
 }
 
 async function save(){
   if(!docRef) return;
-  const diag = document.getElementById('diagLine');
-  if(diag) diag.textContent = 'Écriture en cours...';
-  try{
-    await window.__fbSetDoc(docRef, state);
-    if(diag) diag.textContent = 'Écrit avec succès à ' + new Date().toLocaleTimeString();
-  }catch(e){
-    console.error('save failed', e);
-    if(diag) diag.textContent = 'ÉCHEC DE L\'ÉCRITURE : ' + (e && e.message ? e.message : e);
-    alert("Impossible d'enregistrer : " + (e && e.message ? e.message : e));
-  }
+  try{ await window.__fbSetDoc(docRef, state); }
+  catch(e){ alert("Impossible d'enregistrer : " + (e.message || e)); }
 }
 
 async function init(){
   const params = new URLSearchParams(location.search);
   canEdit = params.get('gm') === '1';
-  const sl = document.getElementById('statusLine');
-  if(sl) sl.textContent = canEdit ? 'Mode : Maître du Jeu' : 'Mode : Agent (lecture / réponse aux missions)';
 
   await window.__fbReady;
-
-  const diag = document.getElementById('diagLine');
-  if(diag) diag.textContent = 'Connexion à la base en cours...';
 
   try{
     docRef = window.__fbDocRef;
     window.__fbOnSnapshot(docRef, (snap) => {
-      const now = new Date().toLocaleTimeString();
       if(snap && snap.exists()){
         const d = snap.data();
         const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v));
@@ -347,45 +417,37 @@ async function init(){
           totalPoints: d.totalPoints||0, 
           pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid()}), 
           active: toArr(d.active).map(item => item.id ? item : {...item, id: uid()}), 
-          history: clone(d.history)||[] 
+          history: clone(d.history)||[],
+          claimed: Array.isArray(d.claimed) ? d.claimed : []
         };
-        if(diag) diag.textContent = 'Connecté — dernière mise à jour reçue à ' + now + ' (total: ' + state.totalPoints + ' pts, ' + state.history.length + ' murders)';
-      } else {
-        if(diag) diag.textContent = 'Connecté — aucun document trouvé dans la base (état vide) à ' + now;
       }
       render();
-    }, (err) => {
-      console.error('onSnapshot error', err);
-      if(diag) diag.textContent = 'ERREUR de connexion : ' + (err && err.message ? err.message : err);
     });
   }catch(e){
     console.error(e);
-    if(diag) diag.textContent = 'ERREUR au démarrage : ' + (e && e.message ? e.message : e);
     render();
   }
 
-  render();
-
+  // PUBLIER UN MURDER
   document.getElementById('btnPublish').onclick = () => {
     const title = document.getElementById('fTitle').value.trim();
     const mission = document.getElementById('fMission').value.trim();
+    const clue = document.getElementById('fClue').value.trim();
     const points = parseInt(document.getElementById('fPoints').value,10) || 0;
     const meta = document.getElementById('fMeta').value.trim();
     const bonusMalus = document.getElementById('fBonusMalus').value.trim();
     if(!title || !mission){ alert('Titre et mission requis.'); return; }
     
     if (!Array.isArray(state.pending)) state.pending = [];
-    state.pending.push({ id: uid(), title, mission, points, meta, bonusMalus });
+    state.pending.push({ id: uid(), title, mission, clue, clueRevealed: false, proof: '', points, meta, bonusMalus });
     
-    render();
-    save();
+    playSound('typewriter');
+    render(); save();
 
-    document.getElementById('fTitle').value='';
-    document.getElementById('fMission').value='';
-    document.getElementById('fMeta').value='';
+    document.getElementById('fTitle').value=''; document.getElementById('fMission').value='';
+    document.getElementById('fClue').value=''; document.getElementById('fMeta').value='';
     document.getElementById('fBonusMalus').value='';
 
-    // Envoi de la notification Push au format JSON
     fetch('https://ntfy.sh/', {
       method: 'POST',
       body: JSON.stringify({
@@ -395,85 +457,108 @@ async function init(){
         priority: 4,
         tags: ['rotating_light', 'warning', 'envelope'],
         click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
-        actions: [
-          {
-            action: 'view',
-            label: 'Ouvrir la mission',
-            url: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
-            clear: true
-          }
-        ]
+        actions: [{ action: 'view', label: 'Ouvrir la mission', url: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/', clear: true }]
       })
-    }).catch(err => console.error('Erreur notification ntfy:', err));
+    }).catch(e=>e);
   };
 
+  // GESTION DES CLICS SUR L'INTERFACE
   document.getElementById('app').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
-    if(!btn){ return; }
+    if(!btn) return;
     const action = btn.dataset.action;
     const id = btn.dataset.id;
     try{
       if(action === 'accept-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){
-          const item = state.pending.splice(idx, 1)[0];
-          if(!state.active) state.active = [];
-          state.active.push(item);
-          render();
-          save();
+          state.active.push(state.pending.splice(idx, 1)[0]);
+          render(); save();
         }
       } else if(action === 'reject-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
-        if(idx !== -1){
-          state.pending.splice(idx, 1);
-          render();
-          save();
-        }
-      } else if(action === 'validate-active'){
+        if(idx !== -1){ state.pending.splice(idx, 1); render(); save(); }
+      
+      } else if(action === 'reveal-clue'){
         const item = state.active.find(m => m.id === id);
-        if(!item) return;
-        if(item.bonusMalus){
-          pendingConfirmKey = 'bonus-active:' + id;
-          render();
-        } else {
-          finalizeValidate(id, 0);
+        if(item && !item.clueRevealed){
+          item.clueRevealed = true;
+          item.points = Math.max(0, item.points - 5);
+          render(); save();
         }
-      } else if(action === 'confirm-validate-bonus'){
-        const input = document.getElementById('bonusPts_' + id);
-        const bonusPts = parseInt((input||{}).value, 10) || 0;
-        finalizeValidate(id, bonusPts);
-      } else if(action === 'confirm-validate-ignore'){
-        finalizeValidate(id, 0);
-      } else if(action === 'delete-active'){
-        pendingConfirmKey = 'delete-active:' + id;
-        render();
-      } else if(action === 'confirm-delete-active'){
+
+      } else if(action === 'submit-proof'){
+        const input = document.getElementById('proof_' + id);
+        if(!input || !input.value.trim()) return;
+        const item = state.active.find(m => m.id === id);
+        if(item){
+          item.proof = input.value.trim();
+          render(); save();
+          fetch('https://ntfy.sh/', {
+            method: 'POST',
+            body: JSON.stringify({
+              topic: 'great-adventure-0810',
+              title: '📄 Rapport de mission soumis !',
+              message: `L'Enquêteuse a envoyé son rapport pour "${item.title}".`,
+              priority: 3, tags: ['mag', 'page_facing_up'],
+              click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
+            })
+          }).catch(e=>e);
+        }
+
+      } else if(action === 'validate-active'){
         const idx = state.active.findIndex(m => m.id === id);
         if(idx !== -1){
+          const item = state.active[idx];
+          const oldTier = LADDER.slice().reverse().find(t => t[0] <= state.totalPoints);
+          state.totalPoints += item.points;
+          state.history.push({ id: uid(), title: item.title, points: item.points });
           state.active.splice(idx, 1);
-          pendingConfirmKey = null;
-          render();
-          save();
+          
+          playSound('stamp');
+          const newTier = LADDER.slice().reverse().find(t => t[0] <= state.totalPoints);
+          if (newTier && (!oldTier || newTier[0] > oldTier[0])) { setTimeout(() => playSound('victory'), 800); }
+          render(); save();
         }
+
+      } else if(action === 'claim-reward'){
+        const pts = parseInt(btn.dataset.pts, 10);
+        if(!state.claimed) state.claimed = [];
+        if(!state.claimed.includes(pts)){
+          state.claimed.push(pts);
+          playSound('victory');
+          if(window.confetti) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+          render(); save();
+          fetch('https://ntfy.sh/', {
+            method: 'POST',
+            body: JSON.stringify({
+              topic: 'great-adventure-0810',
+              title: '🎟 Privilège réclamé !',
+              message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} points !`,
+              priority: 4, tags: ['tada', 'ticket'],
+              click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
+            })
+          }).catch(e=>e);
+        }
+
+      } else if(action === 'delete-active'){
+        pendingConfirmKey = 'delete-active:' + id; render();
+      } else if(action === 'confirm-delete-active'){
+        const idx = state.active.findIndex(m => m.id === id);
+        if(idx !== -1){ state.active.splice(idx, 1); pendingConfirmKey = null; render(); save(); }
       } else if(action === 'delete-history'){
-        pendingConfirmKey = 'delete-history:' + id;
-        render();
+        pendingConfirmKey = 'delete-history:' + id; render();
       } else if(action === 'confirm-delete-history'){
         const idx = state.history.findIndex(h => h.id === id);
         if(idx !== -1){
           state.totalPoints = Math.max(0, state.totalPoints - state.history[idx].points);
           state.history.splice(idx,1);
+          pendingConfirmKey = null; render(); save();
         }
-        pendingConfirmKey = null;
-        render();
-        save();
       } else if(action === 'cancel-confirm'){
-        pendingConfirmKey = null;
-        render();
+        pendingConfirmKey = null; render();
       }
-    }catch(err){
-      console.error('click handler error ('+action+')', err);
-    }
+    }catch(err){ console.error(err); }
   });
 }
 init();
