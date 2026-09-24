@@ -385,16 +385,25 @@ async function init(){
     document.getElementById('fMeta').value='';
     document.getElementById('fBonusMalus').value='';
 
-fetch('https://ntfy.sh/great-adventure-0810', {
+// Envoi de la notification Push au format JSON
+    fetch('https://ntfy.sh/', {
       method: 'POST',
-      headers: {
-        'Title': 'MURDER - Nouveau defi disponible !',
-        'Priority': 'high',
-        'Tags': 'rotating_light,warning,envelope',
-        'Click': 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
-        'Actions': 'view, Ouvrir la mission, https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/'
-      },
-      body: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)\nClique pour voir le dossier !`
+      body: JSON.stringify({
+        topic: 'great-adventure-0810',
+        title: 'MURDER - Nouveau defi disponible !',
+        message: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)`,
+        priority: 4,
+        tags: ['rotating_light', 'warning', 'envelope'],
+        click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
+        actions: [
+          {
+            action: 'view',
+            label: 'Ouvrir la mission',
+            url: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
+            clear: true
+          }
+        ]
+      })
     }).catch(err => console.error('Erreur notification ntfy:', err));
   };
 
