@@ -114,7 +114,7 @@ button.danger{ background:var(--red); border-color:var(--red);}
   <div class="masthead">
     <div class="tag">Dossier classifié</div>
     <h1>The Great Adventure</h1>
-    <div class="sub">Agent titulaire : L'Enquêteuse · Maître du Jeu</div>
+    <div class="sub">Agent titulaire : L'Enquêteuse · Maître du Jeu habilité</div>
     <div class="stamp">Confidentiel</div>
   </div>
 
@@ -153,10 +153,15 @@ button.danger{ background:var(--red); border-color:var(--red);}
     <div class="field"><label>Mission</label><textarea id="fMission" placeholder="Décris la mission..."></textarea></div>
     <div class="row2">
       <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
-      <div class="field"><label>Règlement (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
+      <div class="field"><label>Chrono / contrainte (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
     </div>
     <div class="field"><label>Bonus / Malus (optionnel)</label><input id="fBonusMalus" placeholder="Ex : +10 pts si la photo est drôle / -20 pts si tu craques"></div>
     <button id="btnPublish">Diffuser le Murder</button>
+
+    <div id="validateZone" style="display:none;margin-top:22px;border-top:1px dashed var(--line);padding-top:16px;">
+      <div class="field"><label>Ajustement manuel supplémentaire (optionnel)</label><input id="fAdjust" type="number" placeholder="Ex : -10 ou +10"></div>
+      <div class="locked-note" style="color:#6b6549;">Utilise le bouton « ✔ Valider » directement sur la carte de la mission en cours ci-dessus.</div>
+    </div>
   </div>
 
   <div class="foot" id="statusLine">Chargement...</div>
@@ -327,6 +332,38 @@ async function init(){
 
   await window.__fbReady;
 
+  const diag = document.getElementById('diagLine');
+  if(diag) diag.textContent = 'Connexion à la base en cours...';
+
+  try{
+    docRef = window.__fbDocRef;
+    window.__fbOnSnapshot(docRef, (snap) => {
+      const now = new Date().toLocaleTimeString();
+      if(snap && snap.exists()){
+        const d = snap.data();
+        const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v));
+        const toArr = (v) => Array.isArray(v) ? clone(v) : (v ? [clone(v)] : []);
+        state = { 
+          totalPoints: d.totalPoints||0, 
+          pending: toArr(d.pending).map(item => item.id ? item : {...item, id: uid()}), 
+          active: toArr(d.active).map(item => item.id ? item : {...item, id: uid()}), 
+          history: clone(d.history)||[] 
+        };
+        if(diag) diag.textContent = 'Connecté — dernière mise à jour reçue à ' + now + ' (total: ' + state.totalPoints + ' pts, ' + state.history.length + ' murders)';
+      } else {
+        if(diag) diag.textContent = 'Connecté — aucun document trouvé dans la base (état vide) à ' + now;
+      }
+      render();
+    }, (err) => {
+      console.error('onSnapshot error', err);
+      if(diag) diag.textContent = 'ERREUR de connexion : ' + (err && err.message ? err.message : err);
+    });
+  }catch(e){
+    console.error(e);
+    if(diag) diag.textContent = 'ERREUR au démarrage : ' + (e && e.message ? e.message : e);
+    render();
+  }
+
   render();
 
   document.getElementById('btnPublish').onclick = () => {
@@ -348,7 +385,7 @@ async function init(){
     document.getElementById('fMeta').value='';
     document.getElementById('fBonusMalus').value='';
 
-// Envoi de la notification Push au format JSON
+    // Envoi de la notification Push au format JSON
     fetch('https://ntfy.sh/', {
       method: 'POST',
       body: JSON.stringify({
