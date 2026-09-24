@@ -123,6 +123,7 @@ body{
 button{
   font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; font-size:12px;
   padding:10px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--paper); cursor:pointer;
+  transition: all 0.2s ease;
 }
 button.secondary{ background:transparent; color:var(--ink);}
 button.danger{ background:var(--red); border-color:var(--red); color:var(--paper);}
@@ -134,6 +135,10 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
 .claimed-text { font-size: 11px; color: var(--green); font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.05em; }
 .iconbtn{ background:none; border:none; color:var(--red); font-size:14px; padding:2px 4px; cursor:pointer; font-family:inherit;}
 .iconbtn:hover{ opacity:.7;}
+
+/* BOUTON NAVIGATION */
+.btn-nav { width: 100%; max-width: 420px; margin: 0 auto 20px; display: block; font-size: 14px; padding: 12px; background: var(--gold); color: #1c1706; border-color: var(--gold); }
+[data-theme="terminal"] .btn-nav { background: #ffff33; color: #000; border-color: #ffff33; }
 </style>
 </head>
 <body>
@@ -159,75 +164,86 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
     </div>
   </div>
 
-  <div class="section">
-    <h2>Vitrine d'Honneur de l'Agence</h2>
-    <div id="trophyZone" class="trophy-grid"></div>
-  </div>
+  <!-- NAVIGATION -->
+  <button id="btnToggleView" class="btn-nav">🏆 Consulter la Vitrine d'Honneur</button>
 
-  <div class="section">
-    <h2>En attente de validation</h2>
-    <div id="pendingZone"><div class="empty">Aucun Murder en attente.</div></div>
-  </div>
-
-  <div class="section">
-    <h2>Mission(s) en cours</h2>
-    <div id="activeZone"><div class="empty">Aucune mission active pour le moment.</div></div>
-  </div>
-
-  <div class="section">
-    <h2>Registre des opérations passées</h2>
-    <div id="histZone"><div class="empty">Aucun Murder validé pour l'instant.</div></div>
-  </div>
-
-  <div class="section">
-    <h2>Registre officiel des récompenses</h2>
-    <div class="ladder-scroll" id="ladderZone"></div>
-  </div>
-
-  <div id="gmPanel" style="display:none" class="gm-panel">
-    <h2>Poste de commandement — Maître du Jeu</h2>
-    <div class="field"><label>Titre du Murder</label><input id="fTitle" placeholder="Ex : La Mixologue Clandestine"></div>
-    <div class="field"><label>Mission</label><textarea id="fMission" placeholder="Décris la mission..."></textarea></div>
-    
-    <div class="field">
-      <label>Indice caché (optionnel)</label>
-      <div class="row2">
-        <input id="fClue" placeholder="Texte de l'indice" style="flex:2;">
-        <input id="fCluePenalty" type="number" placeholder="Pénalité (- pts)" style="flex:1;">
-      </div>
-    </div>
-    
-    <div class="row2">
-      <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
-      <div class="field"><label>Règlement (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
-    </div>
-    
-    <div class="field">
-      <label>Bonus / Malus (optionnel)</label>
-      <div class="row2">
-        <select id="fBmType" style="flex:1;">
-          <option value="Bonus">Bonus</option>
-          <option value="Malus">Malus</option>
-        </select>
-        <input id="fBonusMalus" placeholder="Ex : +10 pts si la photo est drôle" style="flex:2;">
-      </div>
+  <!-- VUE 1 : DOSSIER PRINCIPAL -->
+  <div id="viewMain">
+    <div class="section">
+      <h2>En attente de validation</h2>
+      <div id="pendingZone"><div class="empty">Aucun Murder en attente.</div></div>
     </div>
 
-    <button id="btnPublish" style="margin-top:16px;">Diffuser le Murder</button>
+    <div class="section">
+      <h2>Mission(s) en cours</h2>
+      <div id="activeZone"><div class="empty">Aucune mission active pour le moment.</div></div>
+    </div>
 
-    <div style="margin-top:32px; padding-top:16px; border-top:1px dashed var(--line);">
-      <h3 style="margin:0 0 12px; font-family:'Oswald',sans-serif; font-size:14px; color:var(--ink);">Décerner un Trophée (Manuel)</h3>
-      <div class="row2">
-        <select id="fManualTrophy" style="flex:2;">
-          <option value="m_bivouac">Opération Bivouac</option>
-          <option value="m_nego">L'Art de la Négociation</option>
-          <option value="m_profilage">Profilage</option>
-          <option value="m_interro">Interrogatoire Musclé</option>
-          <option value="m_voix">La Voix de l'Agence</option>
-          <option value="m_sixieme">Sixième Sens</option>
-        </select>
-        <button id="btnAwardTrophy" style="flex:1;">✔ Valider</button>
+    <div class="section">
+      <h2>Registre des opérations passées</h2>
+      <div id="histZone"><div class="empty">Aucun Murder validé pour l'instant.</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Registre officiel des récompenses</h2>
+      <div class="ladder-scroll" id="ladderZone"></div>
+    </div>
+
+    <div id="gmPanel" style="display:none" class="gm-panel">
+      <h2>Poste de commandement — Maître du Jeu</h2>
+      <div class="field"><label>Titre du Murder</label><input id="fTitle" placeholder="Ex : La Mixologue Clandestine"></div>
+      <div class="field"><label>Mission</label><textarea id="fMission" placeholder="Décris la mission..."></textarea></div>
+      
+      <div class="field">
+        <label>Indice caché (optionnel)</label>
+        <div class="row2">
+          <input id="fClue" placeholder="Texte de l'indice" style="flex:2;">
+          <input id="fCluePenalty" type="number" placeholder="Pénalité (- pts)" style="flex:1;">
+        </div>
       </div>
+      
+      <div class="row2">
+        <div class="field"><label>Points</label><input id="fPoints" type="number" value="30"></div>
+        <div class="field"><label>Règlement (optionnel)</label><input id="fMeta" placeholder="Ex : 2 minutes chrono"></div>
+      </div>
+      
+      <div class="field">
+        <label>Bonus / Malus (optionnel)</label>
+        <div class="row2">
+          <select id="fBmType" style="flex:1;">
+            <option value="Bonus">Bonus</option>
+            <option value="Malus">Malus</option>
+          </select>
+          <input id="fBonusMalus" placeholder="Ex : +10 pts si la photo est drôle" style="flex:2;">
+        </div>
+      </div>
+
+      <button id="btnPublish" style="margin-top:16px;">Diffuser le Murder</button>
+
+      <div style="margin-top:32px; padding-top:16px; border-top:1px dashed var(--line);">
+        <h3 style="margin:0 0 12px; font-family:'Oswald',sans-serif; font-size:14px; color:var(--ink);">Décerner un Trophée (Manuel)</h3>
+        <div class="row2">
+          <select id="fManualTrophy" style="flex:2;">
+            <option value="m_bivouac">Opération Bivouac</option>
+            <option value="m_nego">L'Art de la Négociation</option>
+            <option value="m_profilage">Profilage</option>
+            <option value="m_interro">Interrogatoire Musclé</option>
+            <option value="m_voix">La Voix de l'Agence</option>
+            <option value="m_sixieme">Sixième Sens</option>
+          </select>
+          <button id="btnAwardTrophy" style="flex:1;">✔ Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE 2 : VITRINE D'HONNEUR -->
+  <div id="viewVitrine" style="display:none;">
+    <div class="section">
+      <h2 style="text-align:center; border:none; margin-bottom:4px; font-size:22px;">Vitrine d'Honneur de l'Agence</h2>
+      <p style="text-align:center; font-size:12px; opacity:0.8; margin-top:0; margin-bottom:24px;">Retrouve ici l'ensemble des insignes et hauts faits classifiés débloqués lors de tes missions.</p>
+      
+      <div id="trophyZone" class="trophy-grid"></div>
     </div>
   </div>
 
@@ -263,6 +279,33 @@ button.danger{ background:var(--red); border-color:var(--red); color:var(--paper
 
 <script>
 const LADDER = [[200,"Massage de 15 minutes"],[400,"Pass « Exemption d'une tâche »"],[500,"Petit-déjeuner au lit"],[750,"Pique-nique en amoureux"],[1000,"Soirée film avec confiseries incluses"],[1250,"Massage complet de 30 minutes"],[1500,"Petit-déjeuner au lit"],[1750,"Massage de 15 minutes"],[2000,"Activité surprise préparée par le Maître du Jeu"],[2250,"Pass « Exemption d'une tâche »"],[2500,"1 cadeau au choix"],[2750,"Massage complet de 30 minutes"],[3000,"Sortie au cinéma"],[3250,"Massage de 15 minutes"],[3500,"Soirée cocktail / apéro maison"],[3750,"Massage complet de 30 minutes"],[4000,"Activité surprise préparée par le Maître du Jeu"],[4250,"Bouquet surprise"],[4500,"Petit-déjeuner au lit"],[4750,"Massage complet de 30 minutes"],[5000,"Un bon restaurant en amoureux"],[5250,"Massage de 15 minutes"],[5500,"1 cadeau au choix"],[5750,"Massage complet de 30 minutes"],[6000,"Activité surprise préparée par le Maître du Jeu"],[6250,"Massage de 15 minutes"],[6500,"Soirée cocktail / apéro maison"],[6750,"Massage complet de 30 minutes"],[7000,"Soirée film & plateau télé au choix"],[7250,"Massage de 15 minutes"],[7500,"Journée / activité surprise (spa, sortie fun...)"],[7750,"Massage complet de 30 minutes"],[8000,"Activité surprise préparée par le Maître du Jeu"],[8250,"Massage de 15 minutes"],[8500,"Bouquet surprise"],[8750,"Massage complet de 30 minutes"],[9000,"Sortie au cinéma"],[9250,"Massage de 15 minutes"],[9500,"Activité surprise préparée par le Maître du Jeu"],[9750,"Massage complet de 30 minutes"],[10000,"Week-end en amoureux à l'hôtel (2 nuits)"],[10250,"Massage de 15 minutes"],[10500,"Pique-nique en amoureux"],[10750,"Massage complet de 30 minutes"],[11000,"Soirée film avec confiseries incluses"],[11250,"Massage de 15 minutes"],[11500,"Soirée cocktail / apéro maison"],[11750,"Massage complet de 30 minutes"],[12000,"Activité surprise préparée par le Maître du Jeu"],[12250,"Massage de 15 minutes"],[12500,"1 cadeau au choix"],[12750,"Massage complet de 30 minutes"],[13000,"Sortie au cinéma"],[13250,"Massage de 15 minutes"],[13500,"Soirée cocktail / apéro maison"],[13750,"Massage complet de 30 minutes"],[14000,"Activité surprise préparée par le Maître du Jeu"],[14250,"Massage de 15 minutes"],[14500,"Bouquet surprise"],[14750,"Massage complet de 30 minutes"],[15000,"Repas gastronomique préparé par le chef Théo"],[15250,"Massage de 15 minutes"],[15500,"Pique-nique en amoureux"],[15750,"Massage complet de 30 minutes"],[16000,"1 cadeau au choix"],[16250,"Massage de 15 minutes"],[16500,"Activité surprise préparée par le Maître du Jeu"],[16750,"Massage complet de 30 minutes"],[17000,"Soirée film avec confiseries incluses"],[17250,"Massage de 15 minutes"],[17500,"Gros restaurant ($$$)"],[17750,"Massage complet de 30 minutes"],[18000,"Bouquet surprise"],[18250,"Massage de 15 minutes"],[18500,"1 cadeau au choix"],[18750,"Massage complet de 30 minutes"],[19000,"Soirée film avec confiseries incluses"],[19250,"Massage de 15 minutes"],[19500,"Soirée cocktail / apéro maison"],[19750,"Massage complet de 30 minutes"],[20000,"Voyage d'une semaine"]];
+
+// GESTION DES VUES (ONGLETS)
+let currentView = 'main';
+document.getElementById('btnToggleView').onclick = () => {
+  if (currentView === 'main') {
+    currentView = 'vitrine';
+    document.getElementById('viewMain').style.display = 'none';
+    document.getElementById('viewVitrine').style.display = 'block';
+    document.getElementById('btnToggleView').innerHTML = '🔙 Retour au Dossier';
+    document.getElementById('btnToggleView').style.background = 'transparent';
+    document.getElementById('btnToggleView').style.color = 'var(--ink)';
+    document.getElementById('btnToggleView').style.borderColor = 'var(--ink)';
+  } else {
+    currentView = 'main';
+    document.getElementById('viewMain').style.display = 'block';
+    document.getElementById('viewVitrine').style.display = 'none';
+    document.getElementById('btnToggleView').innerHTML = '🏆 Consulter la Vitrine d\'Honneur';
+    document.getElementById('btnToggleView').style.background = 'var(--gold)';
+    document.getElementById('btnToggleView').style.color = '#1c1706';
+    document.getElementById('btnToggleView').style.borderColor = 'var(--gold)';
+    if(isDark) {
+      document.getElementById('btnToggleView').style.background = '#ffff33';
+      document.getElementById('btnToggleView').style.color = '#000';
+      document.getElementById('btnToggleView').style.borderColor = '#ffff33';
+    }
+  }
+};
 
 // LISTE COMPLÈTE DES 24 TROPHÉES
 function hasAchiev(id) { return (state.achievements || []).includes(id); }
@@ -332,7 +375,23 @@ function playSound(type) {
 }
 
 let isDark = localStorage.getItem('tga_dark') === '1';
-function applyTheme() { if (isDark) document.documentElement.setAttribute('data-theme', 'terminal'); else document.documentElement.removeAttribute('data-theme'); }
+function applyTheme() { 
+  if (isDark) {
+    document.documentElement.setAttribute('data-theme', 'terminal'); 
+    if(currentView === 'main') {
+      document.getElementById('btnToggleView').style.background = '#ffff33';
+      document.getElementById('btnToggleView').style.color = '#000';
+      document.getElementById('btnToggleView').style.borderColor = '#ffff33';
+    }
+  } else { 
+    document.documentElement.removeAttribute('data-theme');
+    if(currentView === 'main') {
+      document.getElementById('btnToggleView').style.background = 'var(--gold)';
+      document.getElementById('btnToggleView').style.color = '#1c1706';
+      document.getElementById('btnToggleView').style.borderColor = 'var(--gold)';
+    }
+  } 
+}
 function applyMute() { document.getElementById('btnMute').textContent = isMuted ? '🔇' : '🔊'; }
 applyTheme(); applyMute();
 document.getElementById('btnTheme').onclick = () => { isDark = !isDark; localStorage.setItem('tga_dark', isDark ? '1' : '0'); applyTheme(); };
@@ -359,10 +418,8 @@ function finalizeValidate(id, bonusAdjust){
     // VALIDATION DES HAUTS FAITS AUTOMATIQUES
     if(!state.stats) state.stats = { consecValid:0, gardeDates:[], claimDates:[], consecMalus:0, lastMalusDate:0 };
     
-    // Distorsion Spatio-Temporelle (>14 jours)
     if (item.createdAt && now - item.createdAt > 14*24*60*60*1000) unlocked = awardAchiev('a_distorsion') || unlocked;
     
-    // Garde de Nuit & Nuit Blanche
     const hr = new Date().getHours();
     if (hr >= 0 && hr < 4) {
       unlocked = awardAchiev('a_nuit') || unlocked;
@@ -371,10 +428,8 @@ function finalizeValidate(id, bonusAdjust){
       if(state.stats.gardeDates.length >= 2) unlocked = awardAchiev('a_nuitblanche') || unlocked;
     }
 
-    // Le Prix du Sang-Froid (Malus passé avec succès)
     if (item.bmType === 'Malus' && (bonusAdjust||0) >= 0) unlocked = awardAchiev('a_sangfroid') || unlocked;
 
-    // Boucle Temporelle (2 malus consécutifs) & Bon Élève
     if ((bonusAdjust||0) < 0) {
       state.stats.consecMalus = (state.stats.consecMalus || 0) + 1;
       state.stats.lastMalusDate = now;
@@ -384,24 +439,19 @@ function finalizeValidate(id, bonusAdjust){
       if (state.stats.lastMalusDate > 0 && (now - state.stats.lastMalusDate > 30*24*60*60*1000)) unlocked = awardAchiev('a_eleve') || unlocked;
     }
 
-    // Grand Admis (5 consécutifs sans refus)
     state.stats.consecValid = (state.stats.consecValid || 0) + 1;
     if (state.stats.consecValid >= 5) unlocked = awardAchiev('a_admis') || unlocked;
 
-    // Historisation & Ajout des points
     state.history.push({ id: uid(), title: item.title, points: finalPts, timestamp: now });
     state.totalPoints += finalPts;
     state.active.splice(idx, 1);
     pendingConfirmKey = null;
 
-    // Précision Chirurgicale (Tombe pile sur un palier)
     if (LADDER.some(t => t[0] === state.totalPoints)) unlocked = awardAchiev('a_precision') || unlocked;
 
-    // Marathonienne (5 en 48h)
     const recentMurders = state.history.filter(h => h.timestamp && (now - h.timestamp < 48*60*60*1000)).length;
     if (recentMurders >= 5) unlocked = awardAchiev('a_marathon') || unlocked;
 
-    // Paliers Classiques Son
     const newTier = LADDER.slice().reverse().find(t => t[0] <= state.totalPoints);
     const oldTier = LADDER.slice().reverse().find(t => t[0] <= (state.totalPoints - finalPts));
     playSound('stamp');
