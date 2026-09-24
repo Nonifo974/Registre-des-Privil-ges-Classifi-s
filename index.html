@@ -657,7 +657,7 @@ async function init(){
     // Appel Ntfy réintégré
     fetch('https://ntfy.sh/', {
       method: 'POST', body: JSON.stringify({
-        topic: 'great-adventure-081', title: 'MURDER - Nouveau defi disponible !',
+        topic: 'great-adventure-0810', title: 'MURDER - Nouveau defi disponible !',
         message: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)`, priority: 4, tags: ['rotating_light', 'warning', 'envelope'],
         click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/',
         actions: [{ action: 'view', label: 'Ouvrir la mission', url: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/', clear: true }]
@@ -732,7 +732,7 @@ async function init(){
           // Appel Ntfy réintégré
           fetch('https://ntfy.sh/', {
             method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-081', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
+              topic: 'great-adventure-0810-mj', title: '🎟 Privilège réclamé !', message: `L'Enquêteuse souhaite utiliser son coupon de ${pts} pts !`,
               priority: 4, tags: ['tada', 'ticket'], click: 'https://nonifo974.github.io/Registre-des-Privil-ges-Classifi-s/?gm=1'
             })
           }).catch(e=>e);
