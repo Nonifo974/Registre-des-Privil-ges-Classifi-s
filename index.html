@@ -164,6 +164,7 @@ button.danger{ background:var(--red); border-color:var(--red);}
   </div>
 
   <div class="foot" id="statusLine">Chargement...</div>
+  <div class="foot" id="diagLine" style="color:#8a3b2e;"></div>
   <div class="foot">Ce dossier reste strictement confidentiel entre les deux parties signataires.</div>
 </div>
 
@@ -313,19 +314,31 @@ async function init(){
 
   await window.__fbReady;
 
+  const diag = document.getElementById('diagLine');
+  if(diag) diag.textContent = 'Connexion à la base en cours...';
+
   try{
     docRef = window.__fbDocRef;
     window.__fbOnSnapshot(docRef, (snap) => {
+      const now = new Date().toLocaleTimeString();
       if(snap && snap.exists()){
         const d = snap.data();
         const clone = (v) => v == null ? v : JSON.parse(JSON.stringify(v));
         state = { totalPoints: d.totalPoints||0, pending: clone(d.pending)||null, active: clone(d.active)||null, history: clone(d.history)||[] };
+        if(diag) diag.textContent = 'Connecté — dernière mise à jour reçue à ' + now + ' (total: ' + state.totalPoints + ' pts, ' + state.history.length + ' murders)';
+      } else {
+        if(diag) diag.textContent = 'Connecté — aucun document trouvé dans la base (état vide) à ' + now;
       }
       render();
     }, (err) => {
       console.error('onSnapshot error', err);
+      if(diag) diag.textContent = 'ERREUR de connexion : ' + (err && err.message ? err.message : err);
     });
-  }catch(e){ console.error(e); render(); }
+  }catch(e){
+    console.error(e);
+    if(diag) diag.textContent = 'ERREUR au démarrage : ' + (e && e.message ? e.message : e);
+    render();
+  }
 
   render();
 
