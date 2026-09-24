@@ -376,23 +376,24 @@ async function init(){
     
     if (!Array.isArray(state.pending)) state.pending = [];
     state.pending.push({ id: uid(), title, mission, points, meta, bonusMalus });
-
-fetch('https://ntfy.sh/great-adventure-0810', {
-      method: 'POST',
-      headers: {
-        'Title': '🚨 MURDER - Nouveau défi disponible !',
-        'Priority': 'high',
-        'Tags': 'warning,envelope'
-      },
-      body: `Un nouveau Murder est en attente : "${title}" (${points} pts)`
-    }).catch(err => console.error('Erreur notification ntfy:', err));
     
     render();
     save();
+
     document.getElementById('fTitle').value='';
     document.getElementById('fMission').value='';
     document.getElementById('fMeta').value='';
     document.getElementById('fBonusMalus').value='';
+
+fetch('https://ntfy.sh/great-adventure-0810', {
+      method: 'POST',
+      headers: {
+        'Title': 'MURDER - Nouveau defi disponible !',
+        'Priority': 'high',
+        'Tags': 'rotating_light,warning,envelope'
+      },
+      body: `🚨 Un nouveau Murder est en attente : "${title}" (${points} pts)`
+    }).catch(err => console.error('Erreur notification ntfy:', err));
   };
 
   document.getElementById('app').addEventListener('click', (e) => {
