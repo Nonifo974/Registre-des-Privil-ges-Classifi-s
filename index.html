@@ -431,7 +431,28 @@ function extractNumber(text){ const m = (text||'').match(/[-+]?\d+/); return m ?
 
 function awardAchiev(id){
   if (!state.achievements) state.achievements = [];
-  if (!state.achievements.includes(id)) { state.achievements.push(id); return true; }
+  if (!state.achievements.includes(id)) { 
+    state.achievements.push(id); 
+    
+    // On récupère les informations du trophée pour la notification
+    const trophy = TROPHIES.find(t => t.id === id);
+    if(trophy) {
+      // 🔔 NOTIFICATION : Trophée débloqué (Canal Enquêteuse)
+      fetch('https://ntfy.sh/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: 'great-adventure-0810',
+          title: '🏆 Nouvel insigne débloqué !',
+          message: `Félicitations ! Tu as obtenu : ${trophy.icon} ${trophy.label}\n${trophy.desc}`,
+          priority: 3, // J'ai mis 3 (défaut) pour marquer le coup, tu peux mettre 2 si tu veux que ce soit discret
+          tags: ['trophy', 'star2']
+        })
+      }).catch(e=>e);
+    }
+    
+    return true; 
+  }
   return false;
 }
 
