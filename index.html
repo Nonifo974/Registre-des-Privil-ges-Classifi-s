@@ -699,17 +699,16 @@ async function init(){
     try{
       if(action === 'accept-pending'){
         const idx = state.pending.findIndex(m => m.id === id);
-        if(idx !== -1){ state.active.push(state.pending.splice(idx, 1)[0]); render(); save(); }
-      } else if(action === 'reject-pending'){
-        const idx = state.pending.findIndex(m => m.id === id);
         if(idx !== -1){ 
-          state.pending.splice(idx, 1);
-          if(state.stats) state.stats.consecValid = 0; // Remise à zéro Grand Admis
+          const acceptedItem = state.pending[idx];
+          state.active.push(state.pending.splice(idx, 1)[0]); 
           render(); save(); 
 
-	  // 🔔 NOTIFICATION : Murder accepté (Priorité 2 - Canal MJ)
+          // 🔔 NOTIFICATION : Murder accepté (Canal MJ)
           fetch('https://ntfy.sh/', {
-            method: 'POST', body: JSON.stringify({
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               topic: 'great-adventure-0810-mj', 
               title: '🕵️‍♀️ Mission acceptée', 
               message: `L'Enquêteuse a accepté le Murder : "${acceptedItem.title}"`, 
@@ -764,16 +763,22 @@ async function init(){
         if(!state.validatedCoupons) state.validatedCoupons = [];
         if(!state.validatedCoupons.includes(pts)){
           state.validatedCoupons.push(pts); playSound('stamp'); render(); save();
-	  
-	  // Appel Ntfy réintégré
+
+          // Retrouver le nom exact du privilège pour la notification
+          const privilegeName = LADDER.find(t => t[0] === pts)?.[1] || "Privilège";
+
+          // 🔔 NOTIFICATION : Coupon utilisé/validé (Canal Enquêteuse)
           fetch('https://ntfy.sh/', {
-            method: 'POST', body: JSON.stringify({
-              topic: 'great-adventure-0810', title: '🔥 Privilège utilisé !', message: `Vous avez utilisé votre coupon de ${pts} pts !`,
-              priority: 2, 
-	      tags: ['eyes', 'memo']
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              topic: 'great-adventure-0810',
+              title: '🔥 Privilège accordé !',
+              message: `Ton coupon pour "${privilegeName}" (${pts} pts) a bien été exécuté et validé par le MJ ! Félicitation !`,
+              priority: 2,
+              tags: ['gift', 'sparkles']
             })
           }).catch(e=>e);
-
         }
       } else if(action === 'delete-active'){
         pendingConfirmKey = 'delete-active:' + id; render();
