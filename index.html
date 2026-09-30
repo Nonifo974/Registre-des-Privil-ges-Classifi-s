@@ -491,6 +491,17 @@ function finalizeValidate(id, bonusAdjust){
     if (unlocked || (newTier && (!oldTier || newTier[0] > oldTier[0]))) { setTimeout(() => { playSound('victory'); if(window.confetti) confetti(); }, 800); }
     
     render(); save();
+
+    fetch('https://ntfy.sh/', {
+      method: 'POST', body: JSON.stringify({
+        topic: 'great-adventure-0810',
+        title: '✅ Murder validé !',
+        message: `La mission "${item.title}" a été validée (+${finalPts} pts).`,
+        priority: 2,
+        tags: ['white_check_mark', 'medal']
+      })
+    }).catch(e=>e);
+
   }catch(e){ console.error('finalizeValidate error', e); }
 }
 
@@ -695,6 +706,17 @@ async function init(){
           state.pending.splice(idx, 1);
           if(state.stats) state.stats.consecValid = 0; // Remise à zéro Grand Admis
           render(); save(); 
+
+	  // 🔔 NOTIFICATION : Murder accepté (Priorité 2 - Canal MJ)
+          fetch('https://ntfy.sh/', {
+            method: 'POST', body: JSON.stringify({
+              topic: 'great-adventure-0810-mj', 
+              title: '🕵️‍♀️ Mission acceptée', 
+              message: `L'Enquêteuse a accepté le Murder : "${acceptedItem.title}"`, 
+              priority: 2, 
+              tags: ['eyes', 'memo']
+            })
+          }).catch(e=>e);
         }
       } else if(action === 'reveal-clue'){
         const item = state.active.find(m => m.id === id);
@@ -742,6 +764,16 @@ async function init(){
         if(!state.validatedCoupons) state.validatedCoupons = [];
         if(!state.validatedCoupons.includes(pts)){
           state.validatedCoupons.push(pts); playSound('stamp'); render(); save();
+	  
+	  // Appel Ntfy réintégré
+          fetch('https://ntfy.sh/', {
+            method: 'POST', body: JSON.stringify({
+              topic: 'great-adventure-0810', title: '🔥 Privilège utilisé !', message: `Vous avez utilisé votre coupon de ${pts} pts !`,
+              priority: 2, 
+	      tags: ['eyes', 'memo']
+            })
+          }).catch(e=>e);
+
         }
       } else if(action === 'delete-active'){
         pendingConfirmKey = 'delete-active:' + id; render();
